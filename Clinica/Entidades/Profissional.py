@@ -9,6 +9,7 @@ class Profissional(Pessoa):
   @property
   def especialidade(self) -> str:
     return self.__especialidade
+  
   @especialidade.setter
   def especialidade (self, especialidade: str):
     self.__especialidade = especialidade
@@ -16,6 +17,7 @@ class Profissional(Pessoa):
   @property
   def registro_profissional(self) -> str:
     return self.__registro_profissional
+  
   @registro_profissional.setter
-  def registro_profissional(self, rp: str):
-    self.__registro_profissional = rp
+  def registro_profissional(self, registro_profissional: str):
+    self.__registro_profissional = registro_profissional
