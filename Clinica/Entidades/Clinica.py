@@ -21,7 +21,7 @@ class Clinica:
   
   @cidade.setter
   def cidade(self, cidade: str):
-    self._cidade = cidade
+    self.__cidade = cidade
   
   @property
   def descricao(self) -> str:
@@ -32,9 +32,9 @@ class Clinica:
     self.__descricao = descricao
 
   @property
-  def atendimentos(self) -> str:
+  def atendimentos(self) -> list:
     return self.__atendimentos
   
-  @descricao.setter
-  def atendimentos(self, atendimentos: str):
+  @atendimentos.setter
+  def atendimentos(self, atendimentos: list):
     self.__atendimentos = atendimentos
