@@ -1,8 +1,8 @@
 from datetime import date
 from datetime import time
-import Clinica
-import Paciente
-import Profissional
+from Clinica import Clinica
+from Paciente import Paciente
+from Profissional import Profissional
 
 class Atendimento:
     def __init__(self, clinica: Clinica, paciente: Paciente, profissional: Profissional, 
