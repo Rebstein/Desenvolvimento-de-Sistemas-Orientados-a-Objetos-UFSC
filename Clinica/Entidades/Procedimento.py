@@ -7,10 +7,10 @@ class Procedimento:
     self.__profissional = profissional_responsavel
 
   @property
-  def descricao_procedimento(self) -> str:
+  def descricao(self) -> str:
     return self.__descricao
   
-  @descricao_procedimento.setter
+  @descricao.setter
   def descricao(self, descricao: str):
     self.__descricao = descricao
 
