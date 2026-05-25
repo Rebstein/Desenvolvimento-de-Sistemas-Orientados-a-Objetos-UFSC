@@ -2,18 +2,18 @@ from datetime import date
 import Clinica.Entidades.Pagamento.Pagamento as Pagamento
 
 class PagamentoCartao(Pagamento):
-    def __init__(self, data: date, atendimento: Atendimento, paciente: Paciente, valor_pago: float, numero_cartao: str, bandeira: str):
+    def __init__(self, data: date, atendimento: Atendimento, paciente: Paciente, valor_pago: float, numero: int, bandeira: str):
         super().__init__(data, atendimento, paciente, valor_pago)
-        self.__numero_cartao = numero_cartao
+        self.__numero = numero
         self.__bandeira = bandeira
 
     @property
-    def numero_cartao(self): 
-        return self.__numero_cartao
+    def numero(self): 
+        return self.__numero
 
-    @numero_cartao.setter
-    def numero_cartao(self, numero: str): 
-        self.__numero_cartao = numero
+    @numero.setter
+    def numero(self, numero: str): 
+        self.__numero = numero
 
     @property
     def bandeira(self): 
