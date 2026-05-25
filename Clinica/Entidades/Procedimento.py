@@ -1,18 +1,18 @@
 import Profissional
 
 class Procedimento:
-  def __init__(self, descricao_procedimento: str, custo: float, profissional_responsavel: Profissional):
-    self.__descricao_procedimento = descricao_procedimento
+  def __init__(self, descricao: str, custo: float, profissional_responsavel: Profissional):
+    self.__descricao = descricao
     self.__custo = custo
-    self.__profissional_responsavel = profissional_responsavel
+    self.__profissional = profissional_responsavel
 
   @property
   def descricao_procedimento(self) -> str:
-    return self.__descricao_procedimento
+    return self.__descricao
   
   @descricao_procedimento.setter
-  def descricao_procedimento(self, descricao_procedimento: str):
-    self.__descricao_procedimento = descricao_procedimento
+  def descricao(self, descricao: str):
+    self.__descricao = descricao
 
   @property
   def custo(self) -> float:
