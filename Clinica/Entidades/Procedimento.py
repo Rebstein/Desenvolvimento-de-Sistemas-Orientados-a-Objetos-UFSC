@@ -11,7 +11,7 @@ class Procedimento:
     return self.__descricao_procedimento
   
   @descricao_procedimento.setter
-  def descricao__procedimento(self, descricao_procedimento: str):
+  def descricao_procedimento(self, descricao_procedimento: str):
     self.__descricao_procedimento = descricao_procedimento
 
   @property
