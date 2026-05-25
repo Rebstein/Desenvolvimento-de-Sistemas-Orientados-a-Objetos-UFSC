@@ -6,7 +6,7 @@ import Profissional
 
 class Atendimento:
     def __init__(self, clinica: Clinica, paciente: Paciente, profissional: Profissional, 
-                 data_atendimento: date, horario_inicio: time, horario_fim: time, 
+                 data: date, horario_inicio: time, horario_fim: time, 
                  tipo_atendimento: str, valor_total: float):
         
         # atributos de Associação 
@@ -15,7 +15,7 @@ class Atendimento:
         self.__profissional = profissional
         
         # atributos Próprios
-        self.__data_atendimento = data_atendimento
+        self.__data = data
         self.__horario_inicio = horario_inicio
         self.__horario_fim = horario_fim
         self.__tipo_atendimento = tipo_atendimento
@@ -50,12 +50,12 @@ class Atendimento:
         self.__profissional = profissional
 
     @property
-    def data_atendimento(self): 
-        return self.__data_atendimento
+    def data(self): 
+        return self.__data
 
-    @data_atendimento.setter
-    def data_atendimento(self, data: date): 
-        self.__data_atendimento = data
+    @data.setter
+    def data(self, data: date): 
+        self.__data = data
 
     @property
     def horario_inicio(self): 
