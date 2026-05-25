@@ -41,3 +41,7 @@ class Pagamento(ABC):
     @valor_pago.setter
     def valor_pago(self, valor_pago: float): 
         self.__valor_pago = valor_pago
+
+    @abstractmethod
+    def detalhar_pagamento(self) -> str:
+        pass
