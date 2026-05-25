@@ -29,3 +29,7 @@ class Pessoa(ABC):
   @celular.setter
   def celular (self, celular: str):
     self.__celular = celular
+    
+  @abstractmethod
+  def get_tipo(self) -> str:
+      pass
