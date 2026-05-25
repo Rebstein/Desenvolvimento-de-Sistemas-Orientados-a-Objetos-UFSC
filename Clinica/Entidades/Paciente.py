@@ -7,9 +7,9 @@ class Paciente(Pessoa):
     self.__data_nascimento = data_nascimento
 
   @property
-  def data_nascimeto(self) -> date:
+  def data_nascimento(self) -> date:
     return self.__data_nascimento
   
-  @data_nascimeto.setter
+  @data_nascimento.setter
   def data_nascimento(self, data: date):
     self.__data_nascimento = data
