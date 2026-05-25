@@ -4,7 +4,7 @@ class Procedimento:
   def __init__(self, descricao: str, custo: float, profissional_responsavel: Profissional):
     self.__descricao = descricao
     self.__custo = custo
-    self.__profissional = profissional_responsavel
+    self.__profissional_responsavel = profissional_responsavel
 
   @property
   def descricao(self) -> str:
