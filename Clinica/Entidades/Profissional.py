@@ -1,4 +1,4 @@
-import Pessoa
+from Pessoa import Pessoa
 
 class Profissional(Pessoa):
   def __init__(self, nome: str, cpf: str, celular: str, especialidade: str, registro_profissional: str):
