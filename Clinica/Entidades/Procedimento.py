@@ -1,10 +1,10 @@
 import Profissional
 
 class Procedimento:
-  def __init__(self, descricao_procedimento: str, custo: float, profissional_responsável: Profissional):
+  def __init__(self, descricao_procedimento: str, custo: float, profissional_responsavel: Profissional):
     self.__descricao_procedimento = descricao_procedimento
     self.__custo = custo
-    self.__profissional_responsável
+    self.__profissional_responsavel = profissional_responsavel
 
   @property
   def descricao_procedimento(self) -> str:
