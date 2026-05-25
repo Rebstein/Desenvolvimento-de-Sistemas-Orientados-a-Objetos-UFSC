@@ -1,5 +1,5 @@
 from datetime import date
-import Clinica.Entidades.Pagamento.Pagamento as Pagamento
+from Pagamento import Pagamento
 
 class PagamentoCartao(Pagamento):
     def __init__(self, data: date, atendimento: Atendimento, paciente: Paciente, valor_pago: float, numero: int, bandeira: str):
