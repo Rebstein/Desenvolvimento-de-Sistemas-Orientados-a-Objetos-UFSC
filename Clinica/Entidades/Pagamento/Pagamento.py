@@ -1,8 +1,10 @@
 from abc import ABC
 from datetime import date
+import Atendimento
+import Paciente
 
 class Pagamento(ABC):
-    def __init__(self, data: date, atendimneto: "Atendimento", paciente: "Paciente", valor_pago: float):
+    def __init__(self, data: date, atendimento: Atendimento, paciente: Paciente, valor_pago: float):
         self.__data = data
         self.__atendimento = atendimento
         self.__paciente = paciente
@@ -21,7 +23,7 @@ class Pagamento(ABC):
         return self.__atendimento
 
     @atendimento.setter
-    def atendimento(self, atendimento: "Atendimento"): 
+    def atendimento(self, atendimento: Atendimento): 
         self.__atendimento = atendimento
 
     @property
@@ -29,12 +31,12 @@ class Pagamento(ABC):
         return self.__paciente
 
     @paciente.setter
-    def paciente(self, paciente: "Paciente"): 
+    def paciente(self, paciente: Paciente): 
         self.__paciente = paciente
 
     @property
     def valor_pago(self): 
-        self.__valor_pago
+        return self.__valor_pago
 
     @valor_pago.setter
     def valor_pago(self, valor_pago: float): 
