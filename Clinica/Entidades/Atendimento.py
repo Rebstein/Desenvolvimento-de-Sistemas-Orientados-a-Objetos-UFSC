@@ -3,11 +3,12 @@ from datetime import time
 from Clinica import Clinica
 from Paciente import Paciente
 from Profissional import Profissional
+from TipoAtendimento import TipoAtendimento
 
 class Atendimento:
     def __init__(self, clinica: Clinica, paciente: Paciente, profissional: Profissional, 
                  data: date, horario_inicio: time, horario_fim: time, 
-                 tipo_atendimento: str, valor_total: float):
+                 tipo_atendimento: TipoAtendimento, valor_total: float):
         
         # atributos de Associação 
         self.__clinica = clinica
@@ -78,8 +79,8 @@ class Atendimento:
         return self.__tipo_atendimento
 
     @tipo_atendimento.setter
-    def tipo_atendimento(self, tipo: str): 
-        self.__tipo_atendimento = tipo
+    def tipo_atendimento(self, tipo_atendimento: TipoAtendimento): 
+        self.__tipo_atendimento = tipo_atendimento
 
     @property
     def valor_total(self): 

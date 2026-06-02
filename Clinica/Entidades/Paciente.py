@@ -11,5 +11,5 @@ class Paciente(Pessoa):
     return self.__data_nascimento
   
   @data_nascimento.setter
-  def data_nascimento(self, data: date):
-    self.__data_nascimento = data
+  def data_nascimento(self, data_nascimento: date):
+    self.__data_nascimento = data_nascimento
