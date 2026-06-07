@@ -2,6 +2,7 @@ from Entidades.Clinica import Clinica
 from Entidades.Paciente import Paciente
 from Entidades.Profissional import Profissional
 from Entidades.TipoAtendimento import TipoAtendimento
+from datetime import date, time
 
 class Atendimento:
     def __init__(self, clinica: Clinica, paciente: Paciente, profissional: Profissional, 
