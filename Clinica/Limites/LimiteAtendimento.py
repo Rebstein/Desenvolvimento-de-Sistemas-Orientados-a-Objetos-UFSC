@@ -1,6 +1,6 @@
 class LimiteAtendimento:
     def tela_opcoes(self):
-        print("\n--- MÓDULO DE ATENDIMENTOS ---")
+        print("\n------ MÓDULO DE ATENDIMENTOS ------")
         print("1 - Agendar Atendimento")
         print("2 - Listar Atendimentos")
         print("3 - Alterar Atendimento")
@@ -8,7 +8,8 @@ class LimiteAtendimento:
         print("5 - Adicionar Procedimento a um Atendimento")
         print("6 - Registrar Pagamento")
         print("0 - Retornar")
-        
+        print("-" * 33)
+
         try:
             return int(input("Escolha uma opção: "))
         except ValueError:
@@ -19,7 +20,7 @@ class LimiteAtendimento:
 
     def pegar_dados_atendimento(self):
         print("\n--- Preencha os Dados do Atendimento ---")
-        data = input("Data (YYYY-MM-DD): ")
+        data = input("Data (DD-MM-AAAA): ")
         hora_inicio = input("Horário de Início (HH:MM): ")
         hora_fim = input("Horário de Fim (HH:MM): ")
         tipo = input("Tipo (Consulta, Retorno, Exame, Procedimento, Emergência): ")

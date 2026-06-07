@@ -1,5 +1,5 @@
 from datetime import date
-from Entidades.Pagamento import Pagamento
+from Entidades.Pagamento.Pagamento import Pagamento
 from Entidades.Atendimento import Atendimento
 from Entidades.Paciente import Paciente
 

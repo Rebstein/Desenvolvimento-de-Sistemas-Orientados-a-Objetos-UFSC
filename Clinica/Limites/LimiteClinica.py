@@ -1,19 +1,19 @@
 class LimiteClinica:
     def tela_opcoes(self):
-        print("\n--- MÓDULO DE CLÍNICAS ---")
+        print("\n------ CLÍNICAS ------")
         print("1 - Cadastrar Clínica")
         print("2 - Listar Clínicas")
         print("3 - Alterar Clínica")
         print("4 - Excluir Clínica")
-        print("0 - Retornar") # <- Alterado de 6 para 0
-        
+        print("0 - Retornar")
+        print("-" * 33)
         try:
             return int(input("Escolha uma opção: "))
         except ValueError:
             return -1
 
     def pegar_dados_clinica(self):
-        print("\n--- Dados da Clínica ---")
+        print("\n------ Dados da Clínica ------")
         nome = input("Nome da Clínica: ")
         cidade = input("Cidade: ")
         descricao = input("Descrição: ")
