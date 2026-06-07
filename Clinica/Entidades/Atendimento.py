@@ -105,3 +105,14 @@ class Atendimento:
     @pagamentos.setter
     def pagamentos(self, pagamentos: list): 
         self.__pagamentos = pagamentos
+
+    def adicionar_procedimento(self, procedimento):
+        self.__procedimentos.append(procedimento)
+
+    def adicionar_pagamento(self, pagamento):
+        self.__pagamentos.append(pagamento)
+
+    def calcular_valor_restante(self) -> float:
+        valor_pago = sum([pagamento.valor_pago for pagamento in self.__pagamentos])
+        restante = self.__valor_total - valor_pago
+        return restante if restante > 0 else 0.0

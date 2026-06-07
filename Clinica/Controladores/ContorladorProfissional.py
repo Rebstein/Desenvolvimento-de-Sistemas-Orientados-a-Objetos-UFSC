@@ -26,8 +26,8 @@ class ControladorProfissional:
             # Instancia a Entidade com os dados da classe mãe (Pessoa) e os específicos (Profissional)
             novo_profissional = Profissional(
                 dados_profissional["nome"],
-                dados_profissional["celular"],
                 dados_profissional["cpf"],
+                dados_profissional["celular"],
                 dados_profissional["especialidade"],
                 dados_profissional["registro_profissional"]
             )

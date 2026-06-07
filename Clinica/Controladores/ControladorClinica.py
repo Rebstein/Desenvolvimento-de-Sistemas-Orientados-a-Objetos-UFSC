@@ -1,7 +1,7 @@
 from Entidades.Clinica import Clinica
-from Limites.LimitesClinica import LimiteClinica
+from Limites.LimiteClinica import LimiteClinica
 
-class ControladorCLinica:
+class ControladorClinica:
     def __init__(self, controlador_sistema):
         self.__controlador_sistema = controlador_sistema
         #onde as clinicas vão ser armazenadas

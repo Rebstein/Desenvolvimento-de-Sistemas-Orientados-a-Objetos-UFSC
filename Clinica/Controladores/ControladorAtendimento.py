@@ -1,9 +1,9 @@
 from datetime import datetime
 from Entidades.Atendimento import Atendimento
 from Entidades.Procedimento import Procedimento
-from Entidades.PagamentoDinheiro import PagamentoDinheiro
-from Entidades.PagamentoPix import PagamentoPix
-from Entidades.PagamentoCartao import PagamentoCartao
+from Entidades.Pagamento.PagamentoDinheiro import PagamentoDinheiro
+from Entidades.Pagamento.PagamentoPix import PagamentoPix
+from Entidades.Pagamento.PagamentoCartao import PagamentoCartao
 from Limites.LimiteAtendimento import LimiteAtendimento
 
 class ControladorAtendimento:
@@ -11,6 +11,10 @@ class ControladorAtendimento:
         self.__controlador_sistema = controlador_sistema
         self.__atendimentos = []
         self.__limite_atendimento = LimiteAtendimento()
+    
+    @property
+    def atendimentos(self):
+        return self.__atendimentos
 
     # --- MÉTODOS DE BUSCA E CRUD BASE ---
 
