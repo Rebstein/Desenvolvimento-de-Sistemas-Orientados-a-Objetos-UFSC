@@ -1,5 +1,5 @@
 from datetime import date
-from Pessoa import Pessoa
+from Entidades.Pessoa import Pessoa
 
 class Paciente(Pessoa):
   def __init__(self, nome: str, cpf:str, celular: str, data_nascimento: date):
