@@ -1,0 +1,24 @@
+class LimiteSistema:
+    def tela_opcoes(self):
+        print("\n")
+        print("------ SISTEMA DE CLÍNICAS ------")
+        print("\n")
+        print("1 - Clínicas")
+        print("2 - Pacientes")
+        print("3 - Profissionais")
+        print("4 - Atendimentos")
+        print("5 - Relatórios")
+        print("6 - Encerrar Sistema")
+        print("---------------------------------")
+        
+        while True:
+            try:
+                opcao = int(input("Escolha uma opção: "))
+                if opcao in [1, 2, 3, 4, 5, 6]:
+                    return opcao
+                print("Opção inválida! Tente novamente.")
+            except ValueError:
+                print("Por favor, digite um número válido.")
+
+    def mostrar_mensagem(self, msg: str):
+        print(f"\n[SISTEMA]: {msg}")
