@@ -24,7 +24,7 @@ class Procedimento:
 
   @property
   def profissional_responsavel(self): 
-    return self.__profissional
+    return self.__profissional_responsavel
 
   @profissional_responsavel.setter
   def profissional_responsavel(self, profissional_responsavel: Profissional): 

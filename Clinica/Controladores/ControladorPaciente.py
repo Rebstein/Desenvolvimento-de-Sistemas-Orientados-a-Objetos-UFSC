@@ -26,8 +26,8 @@ class ControladorPaciente:
             # Lembre-se que Paciente herda de Pessoa, então recebe os atributos da classe mãe também
             novo_paciente = Paciente(
                 dados_paciente["nome"],
-                dados_paciente["celular"],
                 dados_paciente["cpf"],
+                dados_paciente["celular"],
                 dados_paciente["data_nascimento"]
             )
             self.__pacientes.append(novo_paciente)
