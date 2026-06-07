@@ -21,3 +21,7 @@ class Profissional(Pessoa):
   @registro_profissional.setter
   def registro_profissional(self, registro_profissional: str):
     self.__registro_profissional = registro_profissional
+
+  # Método abstrato
+  def get_tipo(self) -> str:
+    return "Profissional"

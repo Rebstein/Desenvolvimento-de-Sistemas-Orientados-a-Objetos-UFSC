@@ -13,3 +13,7 @@ class Paciente(Pessoa):
   @data_nascimento.setter
   def data_nascimento(self, data_nascimento: date):
     self.__data_nascimento = data_nascimento
+
+  # Método abstrato
+  def get_tipo(self) -> str:
+    return "Paciente"

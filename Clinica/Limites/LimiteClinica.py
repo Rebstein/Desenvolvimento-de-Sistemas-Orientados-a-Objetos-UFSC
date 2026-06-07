@@ -5,7 +5,7 @@ class LimiteClinica:
         print("2 - Listar Clínicas")
         print("3 - Alterar Clínica")
         print("4 - Excluir Clínica")
-        print("6 - Retornar")
+        print("0 - Retornar") # <- Alterado de 6 para 0
         
         try:
             return int(input("Escolha uma opção: "))

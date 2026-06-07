@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import date
-from Atendimento import Atendimento
-from Paciente import Paciente
+from Entidades.Atendimento import Atendimento
+from Entidades.Paciente import Paciente
 
 class Pagamento(ABC):
     def __init__(self, data: date, atendimento: Atendimento, paciente: Paciente, valor_pago: float):
