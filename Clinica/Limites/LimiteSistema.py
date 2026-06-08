@@ -1,14 +1,14 @@
 class LimiteSistema:
     def tela_opcoes(self):
         print("\n")
-        print("------ SISTEMA DE CLÍNICAS ------")
+        print("---- SISTEMA DE CLÍNICAS ----")
         print("1 - Clínicas")
         print("2 - Pacientes")
         print("3 - Profissionais")
         print("4 - Atendimentos")
         print("5 - Relatórios")
-        print("0 - Encerrar Sistema") # <- Alterado de 6 para 0
-        print("-" * 33)
+        print("0 - Encerrar Sistema") 
+        print("-" * 29)
         
         while True:
             try:

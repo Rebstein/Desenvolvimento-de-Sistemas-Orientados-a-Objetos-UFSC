@@ -8,7 +8,7 @@ class LimiteAtendimento:
         print("5 - Adicionar Procedimento a um Atendimento")
         print("6 - Registrar Pagamento")
         print("0 - Retornar")
-        print("-" * 33)
+        print("-" * 35)
 
         try:
             return int(input("Escolha uma opção: "))
@@ -20,13 +20,13 @@ class LimiteAtendimento:
 
     def pegar_dados_atendimento(self):
         print("\n--- Preencha os Dados do Atendimento ---")
-        data = input("Data (DD-MM-AAAA): ")
+        data = input("Data (YYYY-MM-DD): ")
         hora_inicio = input("Horário de Início (HH:MM): ")
         hora_fim = input("Horário de Fim (HH:MM): ")
         tipo = input("Tipo (Consulta, Retorno, Exame, Procedimento, Emergência): ")
         
         try:
-            valor = float(input("Valor Base Total (R$): "))
+            valor = float(input("Valor Total (R$): "))
         except ValueError:
             valor = 0.0
 

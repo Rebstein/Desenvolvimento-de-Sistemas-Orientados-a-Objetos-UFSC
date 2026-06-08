@@ -6,7 +6,7 @@ class LimiteClinica:
         print("3 - Alterar Clínica")
         print("4 - Excluir Clínica")
         print("0 - Retornar")
-        print("-" * 33)
+        print("-" * 22)
         try:
             return int(input("Escolha uma opção: "))
         except ValueError:
@@ -24,11 +24,11 @@ class LimiteClinica:
         return input("Digite o NOME da Clínica que deseja selecionar: ")
 
     def mostrar_clinicas(self, dados_clinicas):
-        print("\n--- Clínicas Cadastradas ---")
+        print("\n-------- Clínicas Cadastradas --------")
         for clinica in dados_clinicas:
             print(f"Nome: {clinica['nome']} | Cidade: {clinica['cidade']}")
             print(f"Descrição: {clinica['descricao']}")
-            print("-" * 20)
+            print("-" * 38)
 
     def mostrar_mensagem(self, msg: str):
         print(f"\n[CLÍNICA]: {msg}")

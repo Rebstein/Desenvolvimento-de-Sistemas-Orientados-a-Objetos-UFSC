@@ -1,6 +1,7 @@
 from datetime import datetime
 from Entidades.Atendimento import Atendimento
 from Entidades.Procedimento import Procedimento
+from Entidades.TipoAtendimento import TipoAtendimento
 from Entidades.Pagamento.PagamentoDinheiro import PagamentoDinheiro
 from Entidades.Pagamento.PagamentoPix import PagamentoPix
 from Entidades.Pagamento.PagamentoCartao import PagamentoCartao
@@ -19,7 +20,6 @@ class ControladorAtendimento:
     # --- MÉTODOS DE BUSCA E CRUD BASE ---
 
     def buscar_atendimento_por_id(self, id_atendimento: int):
-        # Supondo que a Entidade Atendimento gere ou receba um ID único (ou index)
         if 0 <= id_atendimento < len(self.__atendimentos):
             return self.__atendimentos[id_atendimento]
         return None
@@ -40,7 +40,7 @@ class ControladorAtendimento:
             if not paciente:
                 raise ValueError("Paciente não encontrado.")
             
-            # Validação de > 18 anos (Assumindo formato YYYY-MM-DD)
+            # Validação de > 18 anos
             data_nasc = datetime.strptime(paciente.data_nascimento, "%Y-%m-%d").date()
             hoje = datetime.now().date()
             idade = hoje.year - data_nasc.year - ((hoje.month, hoje.day) < (data_nasc.month, data_nasc.day))
@@ -57,21 +57,35 @@ class ControladorAtendimento:
             # 4. Dados do Atendimento
             dados = self.__limite_atendimento.pegar_dados_atendimento()
             
-            # Validação de Horário (Regra 2 - Simplificada: Início deve ser antes do fim)
+            # Validação de Horário
             hora_inicio = datetime.strptime(dados["horario_inicio"], "%H:%M").time()
             hora_fim = datetime.strptime(dados["horario_fim"], "%H:%M").time()
             if hora_inicio >= hora_fim:
                 raise ValueError("Horário inválido: O fim do atendimento deve ser após o início.")
 
-            # Criação do Atendimento (Agregação das entidades)
+            # Mapeamento do Enum de Tipo Atendimento
+            tipo_str = dados["tipo_atendimento"].upper()
+            if tipo_str == "CONSULTA": tipo_enum = TipoAtendimento.CONSULTA
+            elif tipo_str == "EXAME": tipo_enum = TipoAtendimento.EXAME
+            elif tipo_str == "RETORNO": tipo_enum = TipoAtendimento.RETORNO
+            elif tipo_str == "PROCEDIMENTO": tipo_enum = TipoAtendimento.PROCEDIMENTO
+            elif tipo_str in ["EMERGÊNCIA", "EMERGENCIA"]: tipo_enum = TipoAtendimento.EMERGÊNCIA
+            else: raise ValueError("Tipo de atendimento inválido.")
+
+            # Criação do Atendimento
             novo_atendimento = Atendimento(
-                dados["data"], dados["horario_inicio"], dados["horario_fim"], 
-                dados["tipo_atendimento"], dados["valor_total"],
-                clinica, paciente, profissional
+                clinica, 
+                paciente, 
+                profissional,
+                dados["data"], 
+                dados["horario_inicio"], 
+                dados["horario_fim"], 
+                tipo_enum, 
+                dados["valor_total"]
             )
 
-            # REGRA BÔNUS: Se for Retorno, o valor deve ser zerado
-            if dados["tipo_atendimento"].upper() == "RETORNO":
+            # Se for Retorno, o valor deve ser zerado
+            if tipo_enum == TipoAtendimento.RETORNO:
                 novo_atendimento.valor_total = 0.0
 
             self.__atendimentos.append(novo_atendimento)
@@ -95,7 +109,7 @@ class ControladorAtendimento:
                 "paciente": at.paciente.nome,
                 "clinica": at.clinica.nome,
                 "profissional": at.profissional.nome,
-                "tipo": at.tipo_atendimento,
+                "tipo": at.tipo_atendimento.name if isinstance(at.tipo_atendimento, TipoAtendimento) else at.tipo_atendimento,
                 "valor_total": at.valor_total,
                 "valor_restante": at.calcular_valor_restante()
             })
@@ -118,7 +132,6 @@ class ControladorAtendimento:
             self.__limite_atendimento.mostrar_mensagem("ID inválido. Digite um número.")
 
     def alterar_atendimento(self):
-        # Para simplificar na entrega, a alteração foca apenas na data, hora e valor.
         self.listar_atendimentos()
         if not self.__atendimentos:
             return
@@ -133,7 +146,6 @@ class ControladorAtendimento:
             atendimento.data = novos_dados["data"]
             atendimento.horario_inicio = novos_dados["horario_inicio"]
             atendimento.horario_fim = novos_dados["horario_fim"]
-            atendimento.tipo_atendimento = novos_dados["tipo_atendimento"]
             atendimento.valor_total = novos_dados["valor_total"]
             
             self.__limite_atendimento.mostrar_mensagem("Atendimento alterado com sucesso.")
@@ -155,9 +167,15 @@ class ControladorAtendimento:
 
             dados_proc = self.__limite_atendimento.pegar_dados_procedimento()
             
-            # Composição: O procedimento é instanciado aqui dentro e pertence a este atendimento
-            novo_procedimento = Procedimento(dados_proc["descricao"], dados_proc["custo"])
-            atendimento.adicionar_procedimento(novo_procedimento) # Assumindo que a entidade Atendimento tem este método e uma lista interna
+            # Precisamos do profissional que realizou este procedimento
+            cpf_prof = self.__limite_atendimento.pedir_string("Digite o CPF do profissional responsável pelo procedimento: ")
+            prof_resp = self.__controlador_sistema.controlador_profissionais.buscar_profissional_por_cpf(cpf_prof)
+            if not prof_resp:
+                raise ValueError("Profissional não encontrado no sistema.")
+
+            # Composição: O procedimento é instanciado com o profissional e pertence a este atendimento
+            novo_procedimento = Procedimento(dados_proc["descricao"], dados_proc["custo"], prof_resp)
+            atendimento.adicionar_procedimento(novo_procedimento) 
             
             # Atualiza o valor total do atendimento somando o custo do procedimento
             atendimento.valor_total += dados_proc["custo"]
@@ -185,35 +203,34 @@ class ControladorAtendimento:
             self.__limite_atendimento.mostrar_mensagem(f"Valor pendente: R$ {valor_devido:.2f}")
             dados_pag = self.__limite_atendimento.pegar_dados_pagamento()
 
-            # Validação de Data (Regra 3: Pagamento até a data do atendimento)
+            # Validação de Data (Regra 3)
             data_pagamento = datetime.strptime(dados_pag["data"], "%Y-%m-%d").date()
             data_atendimento = datetime.strptime(atendimento.data, "%Y-%m-%d").date()
             if data_pagamento > data_atendimento:
                 raise ValueError("Pagamentos não podem ser realizados após a data do atendimento.")
 
-            # Verifica se o usuário não está tentando pagar mais do que deve
             valor_pago = dados_pag["valor"]
             if valor_pago > valor_devido:
                 self.__limite_atendimento.mostrar_mensagem(f"Valor excede a dívida. Registrando apenas o restante: R$ {valor_devido:.2f}")
                 valor_pago = valor_devido
 
-            tipo_pagamento = dados_pag["tipo_pagamento"] # 1=Dinheiro, 2=PIX, 3=Cartão
+            tipo_pagamento = dados_pag["tipo_pagamento"] 
             novo_pagamento = None
 
-            # Instancia a classe filha correta baseada na escolha (Polimorfismo e Composição)
+            # Ordem correta dos parâmetros: data, atendimento, paciente, valor_pago
             if tipo_pagamento == 1:
-                novo_pagamento = PagamentoDinheiro(dados_pag["data"], valor_pago, atendimento, atendimento.paciente)
+                novo_pagamento = PagamentoDinheiro(dados_pag["data"], atendimento, atendimento.paciente, valor_pago)
             elif tipo_pagamento == 2:
                 cpf_pix = self.__limite_atendimento.pedir_string("Digite o CPF do PIX: ")
-                novo_pagamento = PagamentoPix(dados_pag["data"], valor_pago, atendimento, atendimento.paciente, cpf_pix)
+                novo_pagamento = PagamentoPix(dados_pag["data"], atendimento, atendimento.paciente, valor_pago, cpf_pix)
             elif tipo_pagamento == 3:
-                num_cartao = self.__limite_atendimento.pedir_string("Digite o número do cartão: ")
+                num_cartao = int(self.__limite_atendimento.pedir_string("Digite o número do cartão: "))
                 bandeira = self.__limite_atendimento.pedir_string("Digite a bandeira: ")
-                novo_pagamento = PagamentoCartao(dados_pag["data"], valor_pago, atendimento, atendimento.paciente, num_cartao, bandeira)
+                novo_pagamento = PagamentoCartao(dados_pag["data"], atendimento, atendimento.paciente, valor_pago, num_cartao, bandeira)
             else:
                 raise ValueError("Tipo de pagamento inválido.")
 
-            atendimento.adicionar_pagamento(novo_pagamento) # Adiciona na lista interna de pagamentos do Atendimento
+            atendimento.adicionar_pagamento(novo_pagamento) 
             
             restante_agora = atendimento.calcular_valor_restante()
             self.__limite_atendimento.mostrar_mensagem(f"Pagamento registrado! Restante a pagar: R$ {restante_agora:.2f}")
