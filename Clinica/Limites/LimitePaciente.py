@@ -17,7 +17,7 @@ class LimitePaciente:
         nome = input("Nome: ")
         cpf = input("CPF: ")
         celular = input("Celular: ")
-        data_nascimento = input("Data de Nascimento (YYYY-MM-DD): ")
+        data_nascimento = input("Data de Nascimento (DD-MM-YYYY): ")
         
         return {"nome": nome, "cpf": cpf, "celular": celular, "data_nascimento": data_nascimento}
 

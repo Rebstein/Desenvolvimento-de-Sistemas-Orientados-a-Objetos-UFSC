@@ -20,7 +20,7 @@ class LimiteAtendimento:
 
     def pegar_dados_atendimento(self):
         print("\n--- Preencha os Dados do Atendimento ---")
-        data = input("Data (DD-MM-YYYY): ")
+        data = input("Data (YYYY-MM-DD): ")
         hora_inicio = input("Horário de Início (HH:MM): ")
         hora_fim = input("Horário de Fim (HH:MM): ")
         tipo = input("Tipo (Consulta, Retorno, Exame, Procedimento, Emergência): ")
@@ -46,7 +46,7 @@ class LimiteAtendimento:
 
     def pegar_dados_pagamento(self):
         print("\n--- Registrar Pagamento ---")
-        data = input("Data do Pagamento (DD-MM-YYYY): ")
+        data = input("Data do Pagamento (YYYY-MM-DD): ")
         try:
             valor = float(input("Valor pago (R$): "))
             print("\nTipos de Pagamento:")
