@@ -2,14 +2,19 @@ import PySimpleGUI as sg
 
 class LimiteProfissional:
     def tela_opcoes(self):
-        sg.theme('LightGrey1')
+        sg.theme('BlueMono')
+        
+        # Padrão de tamanho calibrado para o menu
+        fonte_botoes = ("Helvetica", 12)
+        tamanho_botoes = (28, 1)
+        
         layout = [
-            [sg.Text("PROFISSIONAIS", font=("Helvetica", 12, "bold"), pad=(0, 10))],
-            [sg.Button("Cadastrar Profissional", key=1, size=(22, 1))],
-            [sg.Button("Listar Profissionais", key=2, size=(22, 1))],
-            [sg.Button("Alterar Profissional", key=3, size=(22, 1))],
-            [sg.Button("Excluir Profissional", key=4, size=(22, 1))],
-            [sg.Button("Retornar", key=0, size=(22, 1), pad=(0, 10))]
+            [sg.Text("PROFISSIONAIS", font=("Helvetica", 16, "bold"), pad=(0, 15))],
+            [sg.Button("Cadastrar Profissional", key=1, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Listar Profissionais", key=2, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Alterar Profissional", key=3, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Excluir Profissional", key=4, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Retornar", key=0, size=tamanho_botoes, font=fonte_botoes, pad=(0, 15))]
         ]
         window = sg.Window("Módulo Profissionais", layout, element_justification='c')
         evento, _ = window.read()
@@ -20,14 +25,21 @@ class LimiteProfissional:
         return evento
 
     def pegar_dados_profissional(self):
+        # Fontes e tamanhos para os campos do formulário ficarem harmônicos
+        fonte_texto = ("Helvetica", 12)
+        # Tamanho das labels (textos esquerdos) ligeiramente maior para fontes grandes
+        tamanho_label = (18, 1) 
+        
         layout = [
-            [sg.Text("Dados do Profissional", font=("Helvetica", 12, "bold"), pad=(0, 10))],
-            [sg.Text("Nome*:", size=(18, 1)), sg.InputText(key="nome")],
-            [sg.Text("CPF*:", size=(18, 1)), sg.InputText(key="cpf")],
-            [sg.Text("Celular:", size=(18, 1)), sg.InputText(key="celular")],
-            [sg.Text("Especialidade:", size=(18, 1)), sg.InputText(key="especialidade")],
-            [sg.Text("Reg. Profissional*:", size=(18, 1)), sg.InputText(key="registro_profissional")],
-            [sg.Button("Confirmar", key="OK"), sg.Button("Cancelar", key="CANCEL")]
+            [sg.Text("Dados do Profissional", font=("Helvetica", 16, "bold"), pad=(0, 15))],
+            [sg.Text("Nome*:", size=tamanho_label, font=fonte_texto), sg.InputText(key="nome", font=fonte_texto)],
+            [sg.Text("CPF*:", size=tamanho_label, font=fonte_texto), sg.InputText(key="cpf", font=fonte_texto)],
+            [sg.Text("Celular:", size=tamanho_label, font=fonte_texto), sg.InputText(key="celular", font=fonte_texto)],
+            [sg.Text("Especialidade:", size=tamanho_label, font=fonte_texto), sg.InputText(key="especialidade", font=fonte_texto)],
+            [sg.Text("Reg. Profissional*:", size=tamanho_label, font=fonte_texto), sg.InputText(key="registro_profissional", font=fonte_texto)],
+            # Botões inferiores com espaçamento adequado
+            [sg.Button("Confirmar", key="OK", font=fonte_texto, size=(12, 1), pad=(10, 15)), 
+             sg.Button("Cancelar", key="CANCEL", font=fonte_texto, size=(12, 1), pad=(10, 15))]
         ]
         window = sg.Window("Formulário Profissional", layout)
         
@@ -40,26 +52,28 @@ class LimiteProfissional:
                 
             if evento == "OK":
                 if valores["nome"].strip() == "" or valores["cpf"].strip() == "" or valores["registro_profissional"].strip() == "":
-                    sg.popup_error("Erro: Nome, CPF e Registro Profissional são obrigatórios!", title="Campos Vazios")
+                    sg.popup_error("Erro: Nome, CPF e Registro Profissional são obrigatórios!", title="Campos Vazios", font=fonte_texto)
                     continue
                 
                 window.close()
                 return valores
 
     def selecionar_profissional(self):
+        fonte_texto = ("Helvetica", 12)
+        
         layout = [
-            [sg.Text("Digite o CPF do Profissional que deseja selecionar:")],
-            [sg.InputText(key="cpf")],
-            [sg.Button("Selecionar", key="OK"), sg.Button("Cancelar", key="CANCEL")]
+            [sg.Text("Digite o CPF do Profissional que deseja selecionar:", font=fonte_texto, pad=(0, 10))],
+            [sg.InputText(key="cpf", font=fonte_texto, pad=(0, 10))],
+            [sg.Button("Selecionar", key="OK", font=fonte_texto, size=(12, 1)), 
+             sg.Button("Cancelar", key="CANCEL", font=fonte_texto, size=(12, 1))]
         ]
-        window = sg.Window("Selecionar", layout)
+        window = sg.Window("Selecionar", layout, element_justification='c')
         evento, valores = window.read()
         window.close()
         
-        # Só valida se confirmou com OK e o campo não está em branco
         if evento == "OK" and valores["cpf"].strip() != "":
             return valores["cpf"]
-        return None  # Retorna None se desistiu
+        return None
 
     def mostrar_profissionais(self, dados_profissionais):
         texto = "Profissionais Cadastrados\n\n"
@@ -70,7 +84,8 @@ class LimiteProfissional:
             texto += f"Celular: {prof['celular']} | Especialidade: {prof['especialidade']}\n"
             texto += "-" * 50 + "\n"
         
-        sg.popup_scrolled(texto, title="Lista de Profissionais", size=(55, 12))
+        # Aumentado o tamanho da janela de visualização e aplicada a fonte
+        sg.popup_scrolled(texto, title="Lista de Profissionais", size=(65, 15), font=("Helvetica", 12))
 
     def mostrar_mensagem(self, msg: str):
-        sg.popup(f"[PROFISSIONAL]: {msg}", title="Profissionais")
+        sg.popup(f"[PROFISSIONAL]: {msg}", title="Profissionais", font=("Helvetica", 12))

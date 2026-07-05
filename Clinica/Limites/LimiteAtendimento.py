@@ -2,16 +2,21 @@ import PySimpleGUI as sg
 
 class LimiteAtendimento:
     def tela_opcoes(self):
-        sg.theme('LightGrey1')
+        sg.theme('BlueMono')
+        
+        # Padrão calibrado para menus com textos longos nos botões
+        fonte_botoes = ("Helvetica", 12)
+        tamanho_botoes = (44, 1)
+        
         layout = [
-            [sg.Text("ATENDIMENTOS", font=("Helvetica", 12, "bold"), pad=(0, 10))],
-            [sg.Button("Agendar Atendimento", key=1, size=(40, 1))],
-            [sg.Button("Listar Atendimentos", key=2, size=(40, 1))],
-            [sg.Button("Alterar Atendimento", key=3, size=(40, 1))],
-            [sg.Button("Excluir Atendimento", key=4, size=(40, 1))],
-            [sg.Button("Adicionar Procedimento a um Atendimento", key=5, size=(40, 1))],
-            [sg.Button("Registrar Pagamento", key=6, size=(40, 1))],
-            [sg.Button("Retornar", key=0, size=(40, 1), pad=(0, 10))]
+            [sg.Text("ATENDIMENTOS", font=("Helvetica", 16, "bold"), pad=(0, 15))],
+            [sg.Button("Agendar Atendimento", key=1, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Listar Atendimentos", key=2, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Alterar Atendimento", key=3, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Excluir Atendimento", key=4, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Adicionar Procedimento a um Atendimento", key=5, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Registrar Pagamento", key=6, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Retornar", key=0, size=tamanho_botoes, font=fonte_botoes, pad=(0, 15))]
         ]
         window = sg.Window("Atendimentos", layout, element_justification='c')
         evento, _ = window.read()
@@ -22,29 +27,35 @@ class LimiteAtendimento:
         return evento
 
     def pedir_string(self, prompt: str):
+        fonte_texto = ("Helvetica", 12)
+        
         layout = [
-            [sg.Text(prompt)],
-            [sg.InputText(key="resposta")],
-            [sg.Button("OK", key="OK"), sg.Button("Cancelar", key="CANCEL")]
+            [sg.Text(prompt, font=fonte_texto, pad=(0, 10))],
+            [sg.InputText(key="resposta", font=fonte_texto, pad=(0, 10))],
+            [sg.Button("OK", key="OK", font=fonte_texto, size=(12, 1)), 
+             sg.Button("Cancelar", key="CANCEL", font=fonte_texto, size=(12, 1))]
         ]
-        window = sg.Window("Entrada de Dados", layout)
+        window = sg.Window("Entrada de Dados", layout, element_justification='c')
         evento, valores = window.read()
         window.close()
         
-        # Só retorna o texto se o campo não estiver em branco e confirmou com OK
         if evento == "OK" and valores["resposta"].strip() != "":
             return valores["resposta"]
-        return None  # Retorna None para abortar buscas indesejadas por strings vazias
+        return None
 
     def pegar_dados_atendimento(self):
+        fonte_texto = ("Helvetica", 12)
+        tamanho_label = (22, 1)
+        
         layout = [
-            [sg.Text("Preencha os Dados do Atendimento", font=("Helvetica", 11, "bold"), pad=(0, 10))],
-            [sg.Text("Data* (DD-MM-YYYY):", size=(22, 1)), sg.InputText(key="data")],
-            [sg.Text("Horário de Início* (HH:MM):", size=(22, 1)), sg.InputText(key="horario_inicio")],
-            [sg.Text("Horário de Fim* (HH:MM):", size=(22, 1)), sg.InputText(key="horario_fim")],
-            [sg.Text("Tipo Atendimento*:", size=(22, 1)), sg.InputText(key="tipo_atendimento")],
-            [sg.Text("Valor Total (R$):", size=(22, 1)), sg.InputText(key="valor_total")],
-            [sg.Button("Confirmar", key="OK"), sg.Button("Cancelar", key="CANCEL")]
+            [sg.Text("Preencha os Dados do Atendimento", font=("Helvetica", 16, "bold"), pad=(0, 15))],
+            [sg.Text("Data* (DD-MM-YYYY):", size=tamanho_label, font=fonte_texto), sg.InputText(key="data", font=fonte_texto)],
+            [sg.Text("Horário de Início* (HH:MM):", size=tamanho_label, font=fonte_texto), sg.InputText(key="horario_inicio", font=fonte_texto)],
+            [sg.Text("Horário de Fim* (HH:MM):", size=tamanho_label, font=fonte_texto), sg.InputText(key="horario_fim", font=fonte_texto)],
+            [sg.Text("Tipo Atendimento*:", size=tamanho_label, font=fonte_texto), sg.InputText(key="tipo_atendimento", font=fonte_texto)],
+            [sg.Text("Valor Total (R$):", size=tamanho_label, font=fonte_texto), sg.InputText(key="valor_total", font=fonte_texto)],
+            [sg.Button("Confirmar", key="OK", font=fonte_texto, size=(12, 1), pad=(10, 15)), 
+             sg.Button("Cancelar", key="CANCEL", font=fonte_texto, size=(12, 1), pad=(10, 15))]
         ]
         window = sg.Window("Novo Atendimento", layout)
         
@@ -56,14 +67,13 @@ class LimiteAtendimento:
                 return None
                 
             if evento == "OK":
-                # Valida se os campos textuais importantes estão vazios
                 campos_vazios = (valores["data"].strip() == "" or 
                                  valores["horario_inicio"].strip() == "" or 
                                  valores["horario_fim"].strip() == "" or 
                                  valores["tipo_atendimento"].strip() == "")
                                  
                 if campos_vazios:
-                    sg.popup_error("Erro: Data, Horários e Tipo de Atendimento são obrigatórios!", title="Campos Vazios")
+                    sg.popup_error("Erro: Data, Horários e Tipo de Atendimento são obrigatórios!", title="Campos Vazios", font=fonte_texto)
                     continue
                 
                 try:
@@ -75,11 +85,15 @@ class LimiteAtendimento:
                 return valores
 
     def pegar_dados_procedimento(self):
+        fonte_texto = ("Helvetica", 12)
+        tamanho_label = (15, 1)
+        
         layout = [
-            [sg.Text("Adicionar Procedimento", font=("Helvetica", 11, "bold"), pad=(0, 10))],
-            [sg.Text("Descrição:", size=(15, 1)), sg.InputText(key="descricao")],
-            [sg.Text("Custo (R$):", size=(15, 1)), sg.InputText(key="custo")],
-            [sg.Button("Adicionar", key="OK"), sg.Button("Cancelar", key="CANCEL")]
+            [sg.Text("Adicionar Procedimento", font=("Helvetica", 16, "bold"), pad=(0, 15))],
+            [sg.Text("Descrição:", size=tamanho_label, font=fonte_texto), sg.InputText(key="descricao", font=fonte_texto)],
+            [sg.Text("Custo (R$):", size=tamanho_label, font=fonte_texto), sg.InputText(key="custo", font=fonte_texto)],
+            [sg.Button("Adicionar", key="OK", font=fonte_texto, size=(12, 1), pad=(10, 15)), 
+             sg.Button("Cancelar", key="CANCEL", font=fonte_texto, size=(12, 1), pad=(10, 15))]
         ]
         window = sg.Window("Adicionar Procedimento", layout)
         evento, valores = window.read()
@@ -91,21 +105,26 @@ class LimiteAtendimento:
             except ValueError:
                 valores["custo"] = 0.0
             return valores
-        return None  # Retorna None em vez de dicionário com valores fantasmas vazios
+        return None
 
     def pegar_dados_pagamento(self):
+        fonte_texto = ("Helvetica", 12)
+        tamanho_label = (25, 1)
+        
         layout = [
-            [sg.Text("Registrar Pagamento", font=("Helvetica", 11, "bold"), pad=(0, 10))],
-            [sg.Text("Data Pagamento (DD-MM-YYYY):", size=(25, 1)), sg.InputText(key="data")],
-            [sg.Text("Valor Pago (R$):", size=(25, 1)), sg.InputText(key="valor")],
+            [sg.Text("Registrar Pagamento", font=("Helvetica", 16, "bold"), pad=(0, 15))],
+            [sg.Text("Data Pagamento (DD-MM-YYYY):", size=tamanho_label, font=fonte_texto), sg.InputText(key="data", font=fonte_texto)],
+            [sg.Text("Valor Pago (R$):", size=tamanho_label, font=fonte_texto), sg.InputText(key="valor", font=fonte_texto)],
+            # Adicionada a fonte e dimensionamento correto no Frame e nos Radios
             [sg.Frame("Tipo de Pagamento", [
-                [sg.Radio("Dinheiro", "TIPO_PAG", default=True, key=1), 
-                 sg.Radio("PIX", "TIPO_PAG", key=2), 
-                 sg.Radio("Cartão", "TIPO_PAG", key=3)]
-            ], pad=(0, 15))],
-            [sg.Button("Registrar", key="OK"), sg.Button("Cancelar", key="CANCEL")]
+                [sg.Radio("Dinheiro", "TIPO_PAG", default=True, key=1, font=fonte_texto), 
+                 sg.Radio("PIX", "TIPO_PAG", key=2, font=fonte_texto), 
+                 sg.Radio("Cartão", "TIPO_PAG", key=3, font=fonte_texto)]
+            ], title_location=sg.TITLE_LOCATION_TOP, font=fonte_texto, pad=(0, 15))],
+            [sg.Button("Registrar", key="OK", font=fonte_texto, size=(12, 1)), 
+             sg.Button("Cancelar", key="CANCEL", font=fonte_texto, size=(12, 1))]
         ]
-        window = sg.Window("Registrar Pagamento", layout)
+        window = sg.Window("Registrar Pagamento", layout, resizable=True, element_justification='c')
         evento, valores = window.read()
         window.close()
         
@@ -121,7 +140,7 @@ class LimiteAtendimento:
                     tipo_selecionado = k
                     
             return {"data": valores["data"], "valor": valor, "tipo_pagamento": tipo_selecionado}
-        return None  # Retorna None em vez de dicionário com valores fantasmas vazios
+        return None
 
     def mostrar_atendimentos(self, dados_atendimentos):
         texto = "Atendimentos Agendados\n\n"
@@ -134,7 +153,8 @@ class LimiteAtendimento:
             texto += f"Valor Total: R${at['valor_total']:.2f} | Restante: R${at['valor_restante']:.2f}\n"
             texto += "-" * 55 + "\n"
         
-        sg.popup_scrolled(texto, title="Lista de Atendimentos", size=(65, 15))
+        # Janela de rolagem com tamanho adequado para fontes maiores
+        sg.popup_scrolled(texto, title="Lista de Atendimentos", size=(70, 15), font=("Helvetica", 12))
 
     def mostrar_mensagem(self, msg: str):
-        sg.popup(f"[ATENDIMENTO]: {msg}", title="Atendimentos")
+        sg.popup(f"[ATENDIMENTO]: {msg}", title="Atendimentos", font=("Helvetica", 12))

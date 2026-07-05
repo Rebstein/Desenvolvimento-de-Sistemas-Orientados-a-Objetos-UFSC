@@ -2,14 +2,19 @@ import PySimpleGUI as sg
 
 class LimitePaciente:
     def tela_opcoes(self):
-        sg.theme('LightGrey1')
+        sg.theme('BlueMono')
+        
+        # Padrão de tamanho calibrado para o menu
+        fonte_botoes = ("Helvetica", 12)
+        tamanho_botoes = (28, 1)
+        
         layout = [
-            [sg.Text("PACIENTES", font=("Helvetica", 12, "bold"), pad=(0, 10))],
-            [sg.Button("Cadastrar Paciente", key=1, size=(22, 1))],
-            [sg.Button("Listar Pacientes", key=2, size=(22, 1))],
-            [sg.Button("Alterar Paciente", key=3, size=(22, 1))],
-            [sg.Button("Excluir Paciente", key=4, size=(22, 1))],
-            [sg.Button("Retornar", key=0, size=(22, 1), pad=(0, 10))]
+            [sg.Text("PACIENTES", font=("Helvetica", 16, "bold"), pad=(0, 15))],
+            [sg.Button("Cadastrar Paciente", key=1, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Listar Pacientes", key=2, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Alterar Paciente", key=3, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Excluir Paciente", key=4, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
+            [sg.Button("Retornar", key=0, size=tamanho_botoes, font=fonte_botoes, pad=(0, 15))]
         ]
         window = sg.Window("Módulo Pacientes", layout, element_justification='c')
         evento, _ = window.read()
@@ -20,13 +25,19 @@ class LimitePaciente:
         return evento
 
     def pegar_dados_paciente(self):
+        fonte_texto = ("Helvetica", 12)
+        # Ajustado para 15 para alinhar melhor com o tamanho de fonte maior
+        tamanho_label = (15, 1) 
+        
         layout = [
-            [sg.Text("Dados do Paciente", font=("Helvetica", 12, "bold"), pad=(0, 10))],
-            [sg.Text("Nome*:", size=(12, 1)), sg.InputText(key="nome")],
-            [sg.Text("CPF*:", size=(12, 1)), sg.InputText(key="cpf")],
-            [sg.Text("Celular:", size=(12, 1)), sg.InputText(key="celular")],
-            [sg.Text("Nascimento*:", size=(12, 1)), sg.InputText(key="data_nascimento"), sg.Text("(DD-MM-YYYY)", font=("Helvetica", 8, "italic"))],
-            [sg.Button("Confirmar", key="OK"), sg.Button("Cancelar", key="CANCEL")]
+            [sg.Text("Dados do Paciente", font=("Helvetica", 16, "bold"), pad=(0, 15))],
+            [sg.Text("Nome*:", size=tamanho_label, font=fonte_texto), sg.InputText(key="nome", font=fonte_texto)],
+            [sg.Text("CPF*:", size=tamanho_label, font=fonte_texto), sg.InputText(key="cpf", font=fonte_texto)],
+            [sg.Text("Celular:", size=tamanho_label, font=fonte_texto), sg.InputText(key="celular", font=fonte_texto)],
+            # Aumentada a dica da data de 8 para 10 para manter a legibilidade
+            [sg.Text("Nascimento*:", size=tamanho_label, font=fonte_texto), sg.InputText(key="data_nascimento", font=fonte_texto), sg.Text("(DD-MM-YYYY)", font=("Helvetica", 10, "italic"))],
+            [sg.Button("Confirmar", key="OK", font=fonte_texto, size=(12, 1), pad=(10, 15)), 
+             sg.Button("Cancelar", key="CANCEL", font=fonte_texto, size=(12, 1), pad=(10, 15))]
         ]
         window = sg.Window("Formulário Paciente", layout)
         
@@ -39,26 +50,28 @@ class LimitePaciente:
                 
             if evento == "OK":
                 if valores["nome"].strip() == "" or valores["cpf"].strip() == "" or valores["data_nascimento"].strip() == "":
-                    sg.popup_error("Erro: Nome, CPF e Data de Nascimento são obrigatórios!", title="Campos Vazios")
+                    sg.popup_error("Erro: Nome, CPF e Data de Nascimento são obrigatórios!", title="Campos Vazios", font=fonte_texto)
                     continue
                 
                 window.close()
                 return valores
 
     def selecionar_paciente(self):
+        fonte_texto = ("Helvetica", 12)
+        
         layout = [
-            [sg.Text("Digite o CPF do Paciente que deseja selecionar:")],
-            [sg.InputText(key="cpf")],
-            [sg.Button("Selecionar", key="OK"), sg.Button("Cancelar", key="CANCEL")]
+            [sg.Text("Digite o CPF do Paciente que deseja selecionar:", font=fonte_texto, pad=(0, 10))],
+            [sg.InputText(key="cpf", font=fonte_texto, pad=(0, 10))],
+            [sg.Button("Selecionar", key="OK", font=fonte_texto, size=(12, 1)), 
+             sg.Button("Cancelar", key="CANCEL", font=fonte_texto, size=(12, 1))]
         ]
-        window = sg.Window("Selecionar", layout)
+        window = sg.Window("Selecionar", layout, element_justification='c')
         evento, valores = window.read()
         window.close()
         
-        # Só valida se confirmou e o CPF não está em branco
         if evento == "OK" and valores["cpf"].strip() != "":
             return valores["cpf"]
-        return None  # Retorna None se desistiu
+        return None
 
     def mostrar_pacientes(self, dados_pacientes):
         texto = "Pacientes Cadastrados\n\n"
@@ -69,7 +82,8 @@ class LimitePaciente:
             texto += f"Celular: {p['celular']} | Nasc: {p['data_nascimento']}\n"
             texto += "-" * 45 + "\n"
         
-        sg.popup_scrolled(texto, title="Lista de Pacientes", size=(50, 12))
+        # Ampliada a janela de rolagem para ler confortavelmente em fontes maiores
+        sg.popup_scrolled(texto, title="Lista de Pacientes", size=(60, 14), font=("Helvetica", 12))
 
     def mostrar_mensagem(self, msg: str):
-        sg.popup(f"[PACIENTE]: {msg}", title="Pacientes")
+        sg.popup(f"[PACIENTE]: {msg}", title="Pacientes", font=("Helvetica", 12))
