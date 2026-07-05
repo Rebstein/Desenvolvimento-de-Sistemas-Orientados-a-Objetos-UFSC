@@ -1,23 +1,24 @@
+import PySimpleGUI as sg
+
 class LimiteSistema:
     def tela_opcoes(self):
-        print("\n")
-        print("---- SISTEMA DE CLÍNICAS ----")
-        print("1 - Clínicas")
-        print("2 - Pacientes")
-        print("3 - Profissionais")
-        print("4 - Atendimentos")
-        print("5 - Relatórios")
-        print("0 - Encerrar Sistema") 
-        print("-" * 29)
+        sg.theme('LightGrey1')
         
-        while True:
-            try:
-                opcao = int(input("Escolha uma opção: "))
-                if opcao in [0, 1, 2, 3, 4, 5]:
-                    return opcao
-                print("Opção inválida! Tente novamente.")
-            except ValueError:
-                print("Por favor, digite um número válido listado acima.")
+        layout = [
+            [sg.Text("BEM-VINDO AOSISTEMA DE CLÍNICAS", font=("Helvetica", 14, "bold"), pad=(0, 10))],
+            [sg.Button("Clínicas", key=1, size=(25, 1))],
+            [sg.Button("Pacientes", key=2, size=(25, 1))],
+            [sg.Button("Profissionais", key=3, size=(25, 1))],
+            [sg.Button("Atendimentos", key=4, size=(25, 1))],
+            [sg.Button("Relatórios", key=5, size=(25, 1))],
+            [sg.Button("Encerrar Sistema", key=0, button_color=('white', 'red'), size=(25, 1), pad=(0, 15))]
+        ]
+        
+        window = sg.Window("Menu Principal", layout, element_justification='c', finalize=True)
+        evento, _ = window.read()
+        window.close()
+        
+        return evento if evento is not None else 0
                 
     def mostrar_mensagem(self, msg: str):
-        print(f"\n[SISTEMA]: {msg}")
+        sg.popup(f"[SISTEMA]: {msg}", title="Notificação do Sistema")
