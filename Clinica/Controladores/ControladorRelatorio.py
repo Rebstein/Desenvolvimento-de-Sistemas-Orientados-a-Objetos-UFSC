@@ -118,15 +118,17 @@ class ControladorRelatorio:
         while True:
             opcao = self.__limite_relatorio.tela_opcoes()
             
-            # Se fechar a janela no X ou Cancelar (-1 ou None), sai do menu ou trata adequadamente
-            if opcao == 0:
+            if opcao == -1:
+                self.__controlador_sistema.encerrar_sistema()
                 break
-            elif opcao in [1, 2, 3, 4]:
-                opcoes[opcao]()
-            else:
-                # Evita loops infinitos de popups se a janela for fechada incorretamente
-                if opcao is None or opcao == -1:
+
+            funcao_escolhida = opcoes.get(opcao)
+            
+            if funcao_escolhida:
+                funcao_escolhida()
+                if opcao == 0:
                     break
+            else:
                 self.__limite_relatorio.mostrar_mensagem("Opção inválida!")
 
     def retornar(self):

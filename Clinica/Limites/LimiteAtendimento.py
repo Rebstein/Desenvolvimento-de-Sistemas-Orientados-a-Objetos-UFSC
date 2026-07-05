@@ -17,9 +17,8 @@ class LimiteAtendimento:
         evento, _ = window.read()
         window.close()
         
-        # Se fechar no X ou Cancelar, mapeia para 0
         if evento is None or evento == -1:
-            return 0
+            return -1
         return evento
 
     def pedir_string(self, prompt: str):

@@ -14,10 +14,9 @@ class LimiteClinica:
         window = sg.Window("Módulo Clínicas", layout, element_justification='c')
         evento, _ = window.read()
         window.close()
-        
-        # Mapeia o fechamento da janela ou cancelamento para 0 (Retornar)
+    
         if evento is None or evento == -1:
-            return 0
+            return -1
         return evento
 
     def pegar_dados_clinica(self):

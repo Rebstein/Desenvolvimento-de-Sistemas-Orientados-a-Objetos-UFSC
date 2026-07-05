@@ -18,9 +18,8 @@ class LimiteSistema:
         evento, _ = window.read()
         window.close()
         
-        # Se fechar no X (-1 ou None), força o retorno a ser 0 para encerrar o sistema com segurança
         if evento is None or evento == -1:
-            return 0
+            return -1
         return evento
                 
     def mostrar_mensagem(self, msg: str):

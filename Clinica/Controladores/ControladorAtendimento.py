@@ -259,8 +259,6 @@ class ControladorAtendimento:
         except ValueError as e:
             self.__limite_atendimento.mostrar_mensagem(f"Erro na validação: {e}")
 
-    # --- MENU PRINCIPAL DO MÓDULO ---
-
     def abrir_menu(self):
         opcoes = {
             1: self.incluir_atendimento,
@@ -274,11 +272,16 @@ class ControladorAtendimento:
 
         while True:
             opcao = self.__limite_atendimento.tela_opcoes()
+       
+            if opcao == -1:
+                self.__controlador_sistema.encerrar_sistema()
+                break
+
             funcao_escolhida = opcoes.get(opcao)
             
             if funcao_escolhida:
                 funcao_escolhida()
-                if opcao == 0:
+                if opcao == 0: 
                     break
             else:
                 self.__limite_atendimento.mostrar_mensagem("Opção inválida!")

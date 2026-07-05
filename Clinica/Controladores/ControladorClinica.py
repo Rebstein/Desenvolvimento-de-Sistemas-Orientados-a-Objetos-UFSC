@@ -114,6 +114,11 @@ class ControladorClinica:
 
         while True:
             opcao = self.__limite_clinica.tela_opcoes()
+            
+            if opcao == -1:
+                self.__controlador_sistema.encerrar_sistema()
+                break
+
             funcao_escolhida = opcoes.get(opcao)
             
             if funcao_escolhida:

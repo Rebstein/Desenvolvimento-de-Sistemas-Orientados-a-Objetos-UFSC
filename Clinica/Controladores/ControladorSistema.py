@@ -52,9 +52,7 @@ class ControladorSistema:
         while True:
             opcao = self.__limite_sistema.tela_opcoes()
             
-            # Se o usuário fechar a janela no 'X', o PySimpleGUI retorna None ou -1.
-            # Tratar isso para fechar o sistema de forma segura.
-            if opcao == 0 or opcao is None or opcao == -1:
+            if opcao == -1 or opcao == 0:
                 self.encerrar_sistema()
                 break
                 
