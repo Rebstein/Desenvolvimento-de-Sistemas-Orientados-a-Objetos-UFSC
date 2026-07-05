@@ -17,8 +17,6 @@ class ControladorAtendimento:
     def atendimentos(self):
         return self.__atendimentos
 
-    # --- MÉTODOS DE BUSCA E CRUD BASE ---
-
     def buscar_atendimento_por_id(self, id_atendimento: int):
         if 0 <= id_atendimento < len(self.__atendimentos):
             return self.__atendimentos[id_atendimento]
@@ -26,17 +24,33 @@ class ControladorAtendimento:
 
     def incluir_atendimento(self):
         try:
-            # 1. Seleção da Clínica
-            self.__controlador_sistema.controlador_clinicas.listar_clinicas()
+            # VALIDAÇÃO DE CLÍNICAS (Bloqueia antes de pedir o nome)
+            controlador_cli = self.__controlador_sistema.controlador_clinicas
+            if len(controlador_cli._ControladorClinica__clinicas) == 0:
+                controlador_cli.listar_clinicas() # Exibe o popup de "Nenhuma clínica cadastrada"
+                return # Aborta o agendamento imediatamente
+
+            controlador_cli.listar_clinicas()
             nome_clinica = self.__limite_atendimento.pedir_string("Digite o nome da Clínica para o atendimento: ")
-            clinica = self.__controlador_sistema.controlador_clinicas.buscar_clinica_por_nome(nome_clinica)
+            if nome_clinica is None: # Se o usuário cancelou na tela de pedir string
+                return
+                
+            clinica = controlador_cli.buscar_clinica_por_nome(nome_clinica)
             if not clinica:
                 raise ValueError("Clínica não encontrada.")
 
-            # 2. Seleção do Paciente e Validação de Idade (Regra 1)
-            self.__controlador_sistema.controlador_pacientes.listar_pacientes()
+            # VALIDAÇÃO DE PACIENTES (Bloqueia antes de pedir o CPF)
+            controlador_pac = self.__controlador_sistema.controlador_pacientes
+            if len(controlador_pac._ControladorPaciente__pacientes) == 0:
+                controlador_pac.listar_pacientes()
+                return
+
+            controlador_pac.listar_pacientes()
             cpf_paciente = self.__limite_atendimento.pedir_string("Digite o CPF do Paciente: ")
-            paciente = self.__controlador_sistema.controlador_pacientes.buscar_paciente_por_cpf(cpf_paciente)
+            if cpf_paciente is None:
+                return
+                
+            paciente = controlador_pac.buscar_paciente_por_cpf(cpf_paciente)
             if not paciente:
                 raise ValueError("Paciente não encontrado.")
             
@@ -47,15 +61,25 @@ class ControladorAtendimento:
             if idade < 18:
                 raise ValueError("Regra de Negócio: Paciente menor de 18 anos não pode realizar atendimento independente.")
 
-            # 3. Seleção do Profissional
-            self.__controlador_sistema.controlador_profissionais.listar_profissionais()
+            # VALIDAÇÃO DE PROFISSIONAIS (Bloqueia antes de pedir o CPF)
+            controlador_prof = self.__controlador_sistema.controlador_profissionais
+            if len(controlador_prof._ControladorProfissional__profissionais) == 0:
+                controlador_prof.listar_profissionais()
+                return
+
+            controlador_prof.listar_profissionais()
             cpf_profissional = self.__limite_atendimento.pedir_string("Digite o CPF do Profissional: ")
-            profissional = self.__controlador_sistema.controlador_profissionais.buscar_profissional_por_cpf(cpf_profissional)
+            if cpf_profissional is None:
+                return
+                
+            profissional = controlador_prof.buscar_profissional_por_cpf(cpf_profissional)
             if not profissional:
                 raise ValueError("Profissional não encontrado.")
 
             # 4. Dados do Atendimento
             dados = self.__limite_atendimento.pegar_dados_atendimento()
+            if dados is None: # Tratamento de cancelamento do formulário
+                return
             
             # Validação de Horário
             hora_inicio = datetime.strptime(dados["horario_inicio"], "%H:%M").time()
@@ -84,7 +108,6 @@ class ControladorAtendimento:
                 dados["valor_total"]
             )
 
-            # Se for Retorno, o valor deve ser zerado
             if tipo_enum == TipoAtendimento.RETORNO:
                 novo_atendimento.valor_total = 0.0
 
@@ -151,8 +174,6 @@ class ControladorAtendimento:
             self.__limite_atendimento.mostrar_mensagem("Atendimento alterado com sucesso.")
         except ValueError as e:
             self.__limite_atendimento.mostrar_mensagem(f"Erro: {e}")
-
-    # --- MÉTODOS DE COMPOSIÇÃO (Procedimentos e Pagamentos) ---
 
     def adicionar_procedimento(self):
         self.listar_atendimentos()
