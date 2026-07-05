@@ -8,22 +8,25 @@ class ControladorProfissional:
         self.__limite_profissional = LimiteProfissional()
 
     def buscar_profissional_por_cpf(self, cpf: str) -> Profissional | None:
-        """Busca um profissional pelo CPF e retorna o objeto. Retorna None se não encontrar."""
-        for profissional in self.__profissionais:
-            if profissional.cpf == cpf:
-                return profissional
+        if not cpf:
+            return None
+        for profesional in self.__profissionais:
+            if profesional.cpf == cpf:
+                return profesional
         return None
 
     def incluir_profissional(self):
         dados_profissional = self.__limite_profissional.pegar_dados_profissional()
         
-        # Validação de unicidade pelo CPF
+        # CORREÇÃO: Aborta se cancelado
+        if dados_profissional is None:
+            return
+        
         if self.buscar_profissional_por_cpf(dados_profissional["cpf"]) is not None:
             self.__limite_profissional.mostrar_mensagem("Erro: Já existe um profissional cadastrado com este CPF!")
             return
 
         try:
-            # Instancia a Entidade com os dados da classe mãe (Pessoa) e os específicos (Profissional)
             novo_profissional = Profissional(
                 dados_profissional["nome"],
                 dados_profissional["cpf"],
@@ -41,7 +44,6 @@ class ControladorProfissional:
             self.__limite_profissional.mostrar_mensagem("Nenhum profissional cadastrado no sistema.")
             return
 
-        # Preparar os dados para enviar à Tela, mantendo o encapsulamento dos objetos
         dados_profissionais = []
         for profissional in self.__profissionais:
             dados_profissionais.append({
@@ -55,27 +57,32 @@ class ControladorProfissional:
         self.__limite_profissional.mostrar_profissionais(dados_profissionais)
 
     def alterar_profissional(self):
-        self.listar_profissionais()
         if len(self.__profissionais) == 0:
+            self.__limite_profissional.mostrar_mensagem("Nenhum profissional cadastrado no sistema.")
             return
 
         cpf_profissional = self.__limite_profissional.selecionar_profissional()
-        profissional = self.buscar_profissional_por_cpf(cpf_profissional)
+        
+        # Aborta se cancelado
+        if cpf_profissional is None:
+            return
 
+        profissional = self.buscar_profissional_por_cpf(cpf_profissional)
         if profissional is None:
             self.__limite_profissional.mostrar_mensagem("Erro: Profissional não encontrado!")
             return
 
-        self.__limite_profissional.mostrar_mensagem(f"Alterando dados do profissional: {profissional.nome}")
         novos_dados = self.__limite_profissional.pegar_dados_profissional()
+        
+        # Aborta se cancelado
+        if novos_dados is None:
+            return
 
-        # Verifica se o CPF foi alterado para um que já existe
         if novos_dados["cpf"] != profissional.cpf:
             if self.buscar_profissional_por_cpf(novos_dados["cpf"]) is not None:
                 self.__limite_profissional.mostrar_mensagem("Erro: Já existe outro profissional com este novo CPF!")
                 return
 
-        # Atualizando os dados através dos setters
         profissional.nome = novos_dados["nome"]
         profissional.celular = novos_dados["celular"]
         profissional.cpf = novos_dados["cpf"]
@@ -85,13 +92,17 @@ class ControladorProfissional:
         self.__limite_profissional.mostrar_mensagem("Dados do profissional alterados com sucesso!")
 
     def excluir_profissional(self):
-        self.listar_profissionais()
         if len(self.__profissionais) == 0:
+            self.__limite_profissional.mostrar_mensagem("Nenhum profissional cadastrado no sistema.")
             return
 
         cpf_profissional = self.__limite_profissional.selecionar_profissional()
-        profissional = self.buscar_profissional_por_cpf(cpf_profissional)
+        
+        # CORREÇÃO: Aborta se cancelado
+        if cpf_profissional is None:
+            return
 
+        profissional = self.buscar_profissional_por_cpf(cpf_profissional)
         if profissional is None:
             self.__limite_profissional.mostrar_mensagem("Erro: Profissional não encontrado!")
         else:
@@ -119,5 +130,4 @@ class ControladorProfissional:
                 self.__limite_profissional.mostrar_mensagem("Opção inválida! Digite um número válido.")
 
     def retornar(self):
-        # Encerra o loop e volta para o menu principal
         pass

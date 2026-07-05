@@ -14,7 +14,11 @@ class LimiteRelatorio:
         window = sg.Window("Relatórios", layout, element_justification='c')
         evento, _ = window.read()
         window.close()
-        return evento if evento is not None else -1
+        
+        # Mapeia o fechamento da janela ou cancelamento para 0 (Retornar)
+        if evento is None or evento == -1:
+            return 0
+        return evento
 
     def mostrar_mensagem(self, msg: str):
         sg.popup(f"[RELATÓRIO]: {msg}", title="Módulo Relatórios")

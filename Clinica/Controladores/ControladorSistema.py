@@ -8,24 +8,14 @@ from Limites.LimiteSistema import LimiteSistema
 
 class ControladorSistema:
     def __init__(self):
-        # 1. Instanciamos o Limite (Tela Principal)
         self.__limite_sistema = LimiteSistema()
         
-        # 2. Inicializamos as variáveis dos sub-controladores
-        self.__controlador_clinicas = None
-        self.__controlador_pacientes = None
-        self.__controlador_profissionais = None
-        self.__controlador_atendimentos = None
-        self.__controlador_relatorios = None
-        
-        # 3. Instanciamos passando o 'self' para que eles conheçam este Maestro
         self.__controlador_clinicas = ControladorClinica(self)
         self.__controlador_pacientes = ControladorPaciente(self)
         self.__controlador_profissionais = ControladorProfissional(self)
         self.__controlador_atendimentos = ControladorAtendimento(self)
         self.__controlador_relatorios = ControladorRelatorio(self)
 
-    # --- GETTERS (Essenciais para a comunicação entre controladores) ---
     @property
     def controlador_clinicas(self):
         return self.__controlador_clinicas
@@ -46,9 +36,7 @@ class ControladorSistema:
     def controlador_relatorios(self):
         return self.__controlador_relatorios
 
-    # --- FLUXO DE EXECUÇÃO ---
     def inicializar_sistema(self):
-        # Este é o método que será chamado pelo arquivo main.py
         self.abrir_menu()
 
     def abrir_menu(self):
@@ -63,15 +51,19 @@ class ControladorSistema:
 
         while True:
             opcao = self.__limite_sistema.tela_opcoes()
-            funcao_escolhida = opcoes.get(opcao)
             
+            # Se o usuário fechar a janela no 'X', o PySimpleGUI retorna None ou -1.
+            # Tratar isso para fechar o sistema de forma segura.
+            if opcao == 0 or opcao is None or opcao == -1:
+                self.encerrar_sistema()
+                break
+                
+            funcao_escolhida = opcoes.get(opcao)
             if funcao_escolhida:
                 funcao_escolhida()
             else:
                 self.__limite_sistema.mostrar_mensagem("Opção inválida! Digite um número do menu.")
 
-    # --- REDIRECIONAMENTOS ---
-    # Estes métodos apenas "passam a bola" para o controlador específico abrir o seu próprio menu
     def cadastrar_clinicas(self):
         self.__controlador_clinicas.abrir_menu()
 
@@ -90,5 +82,3 @@ class ControladorSistema:
     def encerrar_sistema(self):
         self.__limite_sistema.mostrar_mensagem("Encerrando o Sistema de Clínicas... Até logo!")
         sys.exit(0)
-
-    

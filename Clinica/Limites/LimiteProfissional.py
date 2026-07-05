@@ -14,25 +14,38 @@ class LimiteProfissional:
         window = sg.Window("Módulo Profissionais", layout, element_justification='c')
         evento, _ = window.read()
         window.close()
-        return evento if evento is not None else -1
+        
+        # Mapeia o fechamento da janela ou cancelamento para 0 (Retornar)
+        if evento is None or evento == -1:
+            return 0
+        return evento
 
     def pegar_dados_profissional(self):
         layout = [
             [sg.Text("Dados do Profissional", font=("Helvetica", 12, "bold"), pad=(0, 10))],
-            [sg.Text("Nome:", size=(18, 1)), sg.InputText(key="nome")],
-            [sg.Text("CPF:", size=(18, 1)), sg.InputText(key="cpf")],
+            [sg.Text("Nome*:", size=(18, 1)), sg.InputText(key="nome")],
+            [sg.Text("CPF*:", size=(18, 1)), sg.InputText(key="cpf")],
             [sg.Text("Celular:", size=(18, 1)), sg.InputText(key="celular")],
             [sg.Text("Especialidade:", size=(18, 1)), sg.InputText(key="especialidade")],
-            [sg.Text("Reg. Profissional:", size=(18, 1)), sg.InputText(key="registro_profissional")],
+            [sg.Text("Reg. Profissional*:", size=(18, 1)), sg.InputText(key="registro_profissional")],
             [sg.Button("Confirmar", key="OK"), sg.Button("Cancelar", key="CANCEL")]
         ]
         window = sg.Window("Formulário Profissional", layout)
-        evento, valores = window.read()
-        window.close()
         
-        if evento == "OK":
-            return valores
-        return {"nome": "", "cpf": "", "celular": "", "especialidade": "", "registro_profissional": ""}
+        while True:
+            evento, valores = window.read()
+            
+            if evento in (None, "CANCEL"):
+                window.close()
+                return None
+                
+            if evento == "OK":
+                if valores["nome"].strip() == "" or valores["cpf"].strip() == "" or valores["registro_profissional"].strip() == "":
+                    sg.popup_error("Erro: Nome, CPF e Registro Profissional são obrigatórios!", title="Campos Vazios")
+                    continue
+                
+                window.close()
+                return valores
 
     def selecionar_profissional(self):
         layout = [
@@ -43,12 +56,16 @@ class LimiteProfissional:
         window = sg.Window("Selecionar", layout)
         evento, valores = window.read()
         window.close()
-        return valores["cpf"] if evento == "OK" else ""
+        
+        # Só valida se confirmou com OK e o campo não está em branco
+        if evento == "OK" and valores["cpf"].strip() != "":
+            return valores["cpf"]
+        return None  # Retorna None se desistiu
 
     def mostrar_profissionais(self, dados_profissionais):
         texto = "Profissionais Cadastrados\n\n"
         if not dados_profissionais:
-            texto += "Nenhum profissional registado."
+            texto += "Nenhum profissional cadastrado."
         for prof in dados_profissionais:
             texto += f"Nome: {prof['nome']} | CPF: {prof['cpf']} | Reg: {prof['registro_profissional']}\n"
             texto += f"Celular: {prof['celular']} | Especialidade: {prof['especialidade']}\n"

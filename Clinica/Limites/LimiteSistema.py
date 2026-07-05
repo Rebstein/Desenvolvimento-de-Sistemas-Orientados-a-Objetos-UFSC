@@ -5,7 +5,7 @@ class LimiteSistema:
         sg.theme('LightGrey1')
         
         layout = [
-            [sg.Text("BEM-VINDO AOSISTEMA DE CLÍNICAS", font=("Helvetica", 14, "bold"), pad=(0, 10))],
+            [sg.Text("BEM-VINDO AO SISTEMA DE CLÍNICAS", font=("Helvetica", 14, "bold"), pad=(0, 10))],
             [sg.Button("Clínicas", key=1, size=(25, 1))],
             [sg.Button("Pacientes", key=2, size=(25, 1))],
             [sg.Button("Profissionais", key=3, size=(25, 1))],
@@ -18,7 +18,10 @@ class LimiteSistema:
         evento, _ = window.read()
         window.close()
         
-        return evento if evento is not None else 0
+        # Se fechar no X (-1 ou None), força o retorno a ser 0 para encerrar o sistema com segurança
+        if evento is None or evento == -1:
+            return 0
+        return evento
                 
     def mostrar_mensagem(self, msg: str):
         sg.popup(f"[SISTEMA]: {msg}", title="Notificação do Sistema")

@@ -14,24 +14,37 @@ class LimitePaciente:
         window = sg.Window("Módulo Pacientes", layout, element_justification='c')
         evento, _ = window.read()
         window.close()
-        return evento if evento is not None else -1
+        
+        # Mapeia o fechamento da janela ou cancelamento para 0 (Retornar)
+        if evento is None or evento == -1:
+            return 0
+        return evento
 
     def pegar_dados_paciente(self):
         layout = [
             [sg.Text("Dados do Paciente", font=("Helvetica", 12, "bold"), pad=(0, 10))],
-            [sg.Text("Nome:", size=(12, 1)), sg.InputText(key="nome")],
-            [sg.Text("CPF:", size=(12, 1)), sg.InputText(key="cpf")],
+            [sg.Text("Nome*:", size=(12, 1)), sg.InputText(key="nome")],
+            [sg.Text("CPF*:", size=(12, 1)), sg.InputText(key="cpf")],
             [sg.Text("Celular:", size=(12, 1)), sg.InputText(key="celular")],
-            [sg.Text("Nascimento:", size=(12, 1)), sg.InputText(key="data_nascimento"), sg.Text("(DD-MM-YYYY)", font=("Helvetica", 8, "italic"))],
+            [sg.Text("Nascimento*:", size=(12, 1)), sg.InputText(key="data_nascimento"), sg.Text("(DD-MM-YYYY)", font=("Helvetica", 8, "italic"))],
             [sg.Button("Confirmar", key="OK"), sg.Button("Cancelar", key="CANCEL")]
         ]
         window = sg.Window("Formulário Paciente", layout)
-        evento, valores = window.read()
-        window.close()
         
-        if evento == "OK":
-            return valores
-        return {"nome": "", "cpf": "", "celular": "", "data_nascimento": ""}
+        while True:
+            evento, valores = window.read()
+            
+            if evento in (None, "CANCEL"):
+                window.close()
+                return None
+                
+            if evento == "OK":
+                if valores["nome"].strip() == "" or valores["cpf"].strip() == "" or valores["data_nascimento"].strip() == "":
+                    sg.popup_error("Erro: Nome, CPF e Data de Nascimento são obrigatórios!", title="Campos Vazios")
+                    continue
+                
+                window.close()
+                return valores
 
     def selecionar_paciente(self):
         layout = [
@@ -42,12 +55,16 @@ class LimitePaciente:
         window = sg.Window("Selecionar", layout)
         evento, valores = window.read()
         window.close()
-        return valores["cpf"] if evento == "OK" else ""
+        
+        # Só valida se confirmou e o CPF não está em branco
+        if evento == "OK" and valores["cpf"].strip() != "":
+            return valores["cpf"]
+        return None  # Retorna None se desistiu
 
     def mostrar_pacientes(self, dados_pacientes):
         texto = "Pacientes Cadastrados\n\n"
         if not dados_pacientes:
-            texto += "Nenhum paciente registado."
+            texto += "Nenhum paciente cadastrado."
         for p in dados_pacientes:
             texto += f"Nome: {p['nome']} | CPF: {p['cpf']}\n"
             texto += f"Celular: {p['celular']} | Nasc: {p['data_nascimento']}\n"
@@ -56,4 +73,4 @@ class LimitePaciente:
         sg.popup_scrolled(texto, title="Lista de Pacientes", size=(50, 12))
 
     def mostrar_mensagem(self, msg: str):
-        sg.popup(f"[PACIEINTE]: {msg}", title="Pacientes")
+        sg.popup(f"[PACIENTE]: {msg}", title="Pacientes")

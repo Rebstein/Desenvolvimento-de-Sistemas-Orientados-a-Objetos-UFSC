@@ -4,13 +4,12 @@ from Limites.LimiteClinica import LimiteClinica
 class ControladorClinica:
     def __init__(self, controlador_sistema):
         self.__controlador_sistema = controlador_sistema
-        #onde as clinicas vão ser armazenadas
         self.__clinicas = []
-        #relação com a tela clinica
         self.__limite_clinica = LimiteClinica()
 
     def buscar_clinica_por_nome(self, nome: str) -> Clinica | None:
-        """busca uma clínica pelo nome e retorna o objeto. Retorna None se não encontrar."""
+        if not nome:  # Proteção extra contra buscas vazias
+            return None
         for clinica in self.__clinicas:
             if clinica.nome.upper() == nome.upper():
                 return clinica
@@ -19,7 +18,10 @@ class ControladorClinica:
     def incluir_clinica(self):
         dados_clinica = self.__limite_clinica.pegar_dados_clinica()
         
-        # Validação de unicidade
+        # CORREÇÃO: Se clicou em cancelar ou fechou a janela, interrompe a execução
+        if dados_clinica is None:
+            return
+
         if self.buscar_clinica_por_nome(dados_clinica["nome"]) is not None:
             self.__limite_clinica.mostrar_mensagem("Erro: Já existe uma clínica cadastrada com este nome!")
             return
@@ -40,7 +42,6 @@ class ControladorClinica:
             self.__limite_clinica.mostrar_mensagem("Nenhuma clínica cadastrada no sistema.")
             return
 
-        # Preparar os dados para a Tela (evitando passar o objeto Entidade direto)
         dados_clinicas = []
         for clinica in self.__clinicas:
             dados_clinicas.append({
@@ -52,41 +53,50 @@ class ControladorClinica:
         self.__limite_clinica.mostrar_clinicas(dados_clinicas)
 
     def alterar_clinica(self):
-        self.listar_clinicas()
         if len(self.__clinicas) == 0:
+            self.__limite_clinica.mostrar_mensagem("Nenhuma clínica cadastrada no sistema.")
             return
 
         nome_clinica = self.__limite_clinica.selecionar_clinica()
-        clinica = self.buscar_clinica_por_nome(nome_clinica)
+        
+        # Aborta se o usuário cancelou a seleção
+        if nome_clinica is None:
+            return
 
+        clinica = self.buscar_clinica_por_nome(nome_clinica)
         if clinica is None:
             self.__limite_clinica.mostrar_mensagem("Erro: Clínica não encontrada!")
             return
 
-        self.__limite_clinica.mostrar_mensagem(f"Alterando dados da clínica: {clinica.nome}")
         novos_dados = self.__limite_clinica.pegar_dados_clinica()
+        
+        # Aborta se cancelou o formulário de alteração
+        if novos_dados is None:
+            return
 
-        # Verifica se o novo nome já existe (desde que não seja o nome atual da própria clínica)
         if novos_dados["nome"].upper() != clinica.nome.upper():
             if self.buscar_clinica_por_nome(novos_dados["nome"]) is not None:
                 self.__limite_clinica.mostrar_mensagem("Erro: Já existe outra clínica com este novo nome!")
                 return
 
-        # Atualizando os dados usando as propriedades (setters) da entidade
         clinica.nome = novos_dados["nome"]
         clinica.cidade = novos_dados["cidade"]
         clinica.descricao = novos_dados["descricao"]
         
-        self.__limite_clinica.mostrar_mensagem("Dados da clínica alterados com sucesso!")
+        self.__limite_clinica.mostrar_mensagem("Dados do clínica alterados com sucesso!")
 
     def excluir_clinica(self):
-        self.listar_clinicas()
         if len(self.__clinicas) == 0:
+            self.__limite_clinica.mostrar_mensagem("Nenhuma clínica cadastrada no sistema.")
             return
 
         nome_clinica = self.__limite_clinica.selecionar_clinica()
-        clinica = self.buscar_clinica_por_nome(nome_clinica)
+        
+        # CORREÇÃO: Aborta se cancelou a seleção
+        if nome_clinica is None:
+            return
 
+        clinica = self.buscar_clinica_por_nome(nome_clinica)
         if clinica is None:
             self.__limite_clinica.mostrar_mensagem("Erro: Clínica não encontrada!")
         else:

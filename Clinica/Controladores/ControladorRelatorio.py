@@ -5,42 +5,38 @@ class ControladorRelatorio:
         self.__controlador_sistema = controlador_sistema
         self.__limite_relatorio = LimiteRelatorio()
 
-    # --- MÉTODO AUXILIAR ---
     def __obter_atendimentos(self):
         """Busca a lista de instâncias de Atendimento através do ControladorSistema."""
-        # Supondo que você criou uma @property 'controlador_atendimentos' no ControladorSistema
-        # e uma @property 'atendimentos' no ControladorAtendimento que retorna a lista.
-        return self.__controlador_sistema.controlador_atendimentos.atendimentos
+        try:
+            return self.__controlador_sistema.controlador_atendimentos.atendimentos
+        except AttributeError:
+            return []
 
-    # --- 1. CLÍNICAS COM MAIOR NÚMERO DE ATENDIMENTOS ---
     def emitir_clinicas_mais_atendimentos(self):
         atendimentos = self.__obter_atendimentos()
-        if not atendimentos:
-            self.__limite_relatorio.mostrar_mensagem("Não há atendimentos para gerar relatório.")
+        if not atendimentos or len(atendimentos) == 0:
+            self.__limite_relatorio.mostrar_mensagem("Não há atendimentos registrados para gerar o relatório de clínicas.")
             return
 
         contagem_clinicas = {}
         for at in atendimentos:
-            nome_clinica = at.clinica.nome
-            if nome_clinica in contagem_clinicas:
-                contagem_clinicas[nome_clinica] += 1
-            else:
-                contagem_clinicas[nome_clinica] = 1
+            if at.clinica and at.clinica.nome:
+                nome_clinica = at.clinica.nome
+                contagem_clinicas[nome_clinica] = contagem_clinicas.get(nome_clinica, 0) + 1
 
-        # Ordena o dicionário pelo número de atendimentos (do maior para o menor)
-        ranking = sorted(contagem_clinicas.items(), key=lambda item: item[1], reverse=True)
-        
-        # Envia a lista ordenada para a View
-        self.__limite_relatorio.mostrar_relatorio_clinicas(ranking)
-
-    # --- 2. ATENDIMENTOS MAIS CAROS E MAIS BARATOS ---
-    def emitir_atendimentos_extremos(self):
-        atendimentos = self.__obter_atendimentos()
-        if not atendimentos:
-            self.__limite_relatorio.mostrar_mensagem("Não há atendimentos para gerar relatório.")
+        if not contagem_clinicas:
+            self.__limite_relatorio.mostrar_mensagem("Nenhum dado válido de clínicas foi encontrado.")
             return
 
-        # Inicializa com o primeiro elemento para ter uma base de comparação
+        ranking = sorted(contagem_clinicas.items(), key=lambda item: item[1], reverse=True)
+        self.__limite_relatorio.mostrar_relatorio_clinicas(ranking)
+
+    def emitir_atendimentos_extremos(self):
+        atendimentos = self.__obter_atendimentos()
+        if not atendimentos or len(atendimentos) == 0:
+            self.__limite_relatorio.mostrar_mensagem("Não há atendimentos registrados para gerar o relatório de extremos.")
+            return
+
         mais_caro = atendimentos[0]
         mais_barato = atendimentos[0]
 
@@ -60,36 +56,29 @@ class ControladorRelatorio:
         }
         self.__limite_relatorio.mostrar_relatorio_atendimentos_extremos(dados)
 
-    # --- 3. PROCEDIMENTOS MAIS REALIZADOS ---
     def emitir_procedimentos_populares(self):
         atendimentos = self.__obter_atendimentos()
-        if not atendimentos:
-            self.__limite_relatorio.mostrar_mensagem("Não há atendimentos para gerar relatório.")
+        if not atendimentos or len(atendimentos) == 0:
+            self.__limite_relatorio.mostrar_mensagem("Não há atendimentos registrados para analisar procedimentos.")
             return
 
         contagem_procedimentos = {}
         for at in atendimentos:
-            # Assumindo que a classe Atendimento tem uma @property 'procedimentos' que retorna a lista
             for proc in at.procedimentos: 
                 desc = proc.descricao
-                if desc in contagem_procedimentos:
-                    contagem_procedimentos[desc] += 1
-                else:
-                    contagem_procedimentos[desc] = 1
+                contagem_procedimentos[desc] = contagem_procedimentos.get(desc, 0) + 1
 
         if not contagem_procedimentos:
-            self.__limite_relatorio.mostrar_mensagem("Nenhum procedimento foi registrado nos atendimentos.")
+            self.__limite_relatorio.mostrar_mensagem("Nenhum procedimento foi registrado nos atendimentos até o momento.")
             return
 
-        # Ordena do mais popular para o menos popular
         ranking = sorted(contagem_procedimentos.items(), key=lambda item: item[1], reverse=True)
         self.__limite_relatorio.mostrar_relatorio_procedimentos_populares(ranking)
 
-    # --- 4. PROCEDIMENTOS MAIS CAROS E MAIS BARATOS ---
     def emitir_procedimentos_extremos(self):
         atendimentos = self.__obter_atendimentos()
-        if not atendimentos:
-            self.__limite_relatorio.mostrar_mensagem("Não há atendimentos para gerar relatório.")
+        if not atendimentos or len(atendimentos) == 0:
+            self.__limite_relatorio.mostrar_mensagem("Não há atendimentos para analisar o custo de procedimentos.")
             return
 
         todos_procedimentos = []
@@ -97,7 +86,7 @@ class ControladorRelatorio:
             todos_procedimentos.extend(at.procedimentos)
 
         if not todos_procedimentos:
-            self.__limite_relatorio.mostrar_mensagem("Nenhum procedimento foi registrado para análise.")
+            self.__limite_relatorio.mostrar_mensagem("Nenhum procedimento foi encontrado para análise de valores.")
             return
 
         mais_caro = todos_procedimentos[0]
@@ -117,7 +106,6 @@ class ControladorRelatorio:
         }
         self.__limite_relatorio.mostrar_relatorio_procedimentos_extremos(dados)
 
-    # --- MENU PRINCIPAL DO MÓDULO ---
     def abrir_menu(self):
         opcoes = {
             1: self.emitir_clinicas_mais_atendimentos,
@@ -129,13 +117,16 @@ class ControladorRelatorio:
 
         while True:
             opcao = self.__limite_relatorio.tela_opcoes()
-            funcao_escolhida = opcoes.get(opcao)
             
-            if funcao_escolhida:
-                funcao_escolhida()
-                if opcao == 0:
-                    break
+            # Se fechar a janela no X ou Cancelar (-1 ou None), sai do menu ou trata adequadamente
+            if opcao == 0:
+                break
+            elif opcao in [1, 2, 3, 4]:
+                opcoes[opcao]()
             else:
+                # Evita loops infinitos de popups se a janela for fechada incorretamente
+                if opcao is None or opcao == -1:
+                    break
                 self.__limite_relatorio.mostrar_mensagem("Opção inválida!")
 
     def retornar(self):

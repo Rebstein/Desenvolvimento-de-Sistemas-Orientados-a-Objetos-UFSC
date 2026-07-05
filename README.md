@@ -4,6 +4,8 @@
 
 <h6 align="left">Neste repositório fizemos a implementação de um sistema orientado a objetos em Python para gerenciamento de clínicas, profissionais de saúde e atendimentos de pacientes.</h6>
 
+<h6 align="left">O sistema é baseado no model MVC, possui interface gráfica feita com PySImpleGUI, e persistência dos registros</h6>
+
 ###
 
 <div align="left">

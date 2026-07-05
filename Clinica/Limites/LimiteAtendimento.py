@@ -16,7 +16,11 @@ class LimiteAtendimento:
         window = sg.Window("Atendimentos", layout, element_justification='c')
         evento, _ = window.read()
         window.close()
-        return evento if evento is not None else -1
+        
+        # Se fechar no X ou Cancelar, mapeia para 0
+        if evento is None or evento == -1:
+            return 0
+        return evento
 
     def pedir_string(self, prompt: str):
         layout = [
@@ -27,29 +31,49 @@ class LimiteAtendimento:
         window = sg.Window("Entrada de Dados", layout)
         evento, valores = window.read()
         window.close()
-        return valores["resposta"] if evento == "OK" else ""
+        
+        # Só retorna o texto se o campo não estiver em branco e confirmou com OK
+        if evento == "OK" and valores["resposta"].strip() != "":
+            return valores["resposta"]
+        return None  # Retorna None para abortar buscas indesejadas por strings vazias
 
     def pegar_dados_atendimento(self):
         layout = [
             [sg.Text("Preencha os Dados do Atendimento", font=("Helvetica", 11, "bold"), pad=(0, 10))],
-            [sg.Text("Data (DD-MM-YYYY):", size=(22, 1)), sg.InputText(key="data")],
-            [sg.Text("Horário de Início (HH:MM):", size=(22, 1)), sg.InputText(key="horario_inicio")],
-            [sg.Text("Horário de Fim (HH:MM):", size=(22, 1)), sg.InputText(key="horario_fim")],
-            [sg.Text("Tipo Atendimento:", size=(22, 1)), sg.InputText(key="tipo_atendimento")],
+            [sg.Text("Data* (DD-MM-YYYY):", size=(22, 1)), sg.InputText(key="data")],
+            [sg.Text("Horário de Início* (HH:MM):", size=(22, 1)), sg.InputText(key="horario_inicio")],
+            [sg.Text("Horário de Fim* (HH:MM):", size=(22, 1)), sg.InputText(key="horario_fim")],
+            [sg.Text("Tipo Atendimento*:", size=(22, 1)), sg.InputText(key="tipo_atendimento")],
             [sg.Text("Valor Total (R$):", size=(22, 1)), sg.InputText(key="valor_total")],
             [sg.Button("Confirmar", key="OK"), sg.Button("Cancelar", key="CANCEL")]
         ]
         window = sg.Window("Novo Atendimento", layout)
-        evento, valores = window.read()
-        window.close()
         
-        if evento == "OK":
-            try:
-                valores["valor_total"] = float(valores["valor_total"])
-            except ValueError:
-                valores["valor_total"] = 0.0
-            return valores
-        return {"data": "", "horario_inicio": "", "horario_fim": "", "tipo_atendimento": "", "valor_total": 0.0}
+        while True:
+            evento, valores = window.read()
+            
+            if evento in (None, "CANCEL"):
+                window.close()
+                return None
+                
+            if evento == "OK":
+                # Valida se os campos textuais importantes estão vazios
+                campos_vazios = (valores["data"].strip() == "" or 
+                                 valores["horario_inicio"].strip() == "" or 
+                                 valores["horario_fim"].strip() == "" or 
+                                 valores["tipo_atendimento"].strip() == "")
+                                 
+                if campos_vazios:
+                    sg.popup_error("Erro: Data, Horários e Tipo de Atendimento são obrigatórios!", title="Campos Vazios")
+                    continue
+                
+                try:
+                    valores["valor_total"] = float(valores["valor_total"])
+                except ValueError:
+                    valores["valor_total"] = 0.0
+                    
+                window.close()
+                return valores
 
     def pegar_dados_procedimento(self):
         layout = [
@@ -68,7 +92,7 @@ class LimiteAtendimento:
             except ValueError:
                 valores["custo"] = 0.0
             return valores
-        return {"descricao": "", "custo": 0.0}
+        return None  # Retorna None em vez de dicionário com valores fantasmas vazios
 
     def pegar_dados_pagamento(self):
         layout = [
@@ -98,7 +122,7 @@ class LimiteAtendimento:
                     tipo_selecionado = k
                     
             return {"data": valores["data"], "valor": valor, "tipo_pagamento": tipo_selecionado}
-        return {"data": "", "valor": 0.0, "tipo_pagamento": 1}
+        return None  # Retorna None em vez de dicionário com valores fantasmas vazios
 
     def mostrar_atendimentos(self, dados_atendimentos):
         texto = "Atendimentos Agendados\n\n"

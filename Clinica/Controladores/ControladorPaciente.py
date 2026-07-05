@@ -8,7 +8,8 @@ class ControladorPaciente:
         self.__limite_paciente = LimitePaciente()
 
     def buscar_paciente_por_cpf(self, cpf: str) -> Paciente | None:
-        """Busca um paciente pelo CPF e retorna o objeto. Retorna None se não encontrar."""
+        if not cpf:
+            return None
         for paciente in self.__pacientes:
             if paciente.cpf == cpf:
                 return paciente
@@ -17,13 +18,15 @@ class ControladorPaciente:
     def incluir_paciente(self):
         dados_paciente = self.__limite_paciente.pegar_dados_paciente()
         
-        # Validação de unicidade: O CPF é a chave primária
+        # Cancelar operação se retornar None
+        if dados_paciente is None:
+            return
+        
         if self.buscar_paciente_por_cpf(dados_paciente["cpf"]) is not None:
             self.__limite_paciente.mostrar_mensagem("Erro: Já existe um paciente cadastrado com este CPF!")
             return
 
         try:
-            # Lembre-se que Paciente herda de Pessoa, então recebe os atributos da classe mãe também
             novo_paciente = Paciente(
                 dados_paciente["nome"],
                 dados_paciente["cpf"],
@@ -40,7 +43,6 @@ class ControladorPaciente:
             self.__limite_paciente.mostrar_mensagem("Nenhum paciente cadastrado no sistema.")
             return
 
-        # Preparar os dados em formato de dicionário para enviar à Tela
         dados_pacientes = []
         for paciente in self.__pacientes:
             dados_pacientes.append({
@@ -53,27 +55,32 @@ class ControladorPaciente:
         self.__limite_paciente.mostrar_pacientes(dados_pacientes)
 
     def alterar_paciente(self):
-        self.listar_pacientes()
         if len(self.__pacientes) == 0:
+            self.__limite_paciente.mostrar_mensagem("Nenhum paciente cadastrado no sistema.")
             return
 
         cpf_paciente = self.__limite_paciente.selecionar_paciente()
-        paciente = self.buscar_paciente_por_cpf(cpf_paciente)
+        
+        # Cancelar se a seleção retornar None
+        if cpf_paciente is None:
+            return
 
+        paciente = self.buscar_paciente_por_cpf(cpf_paciente)
         if paciente is None:
             self.__limite_paciente.mostrar_mensagem("Erro: Paciente não encontrado!")
             return
 
-        self.__limite_paciente.mostrar_mensagem(f"Alterando dados do paciente: {paciente.nome}")
         novos_dados = self.__limite_paciente.pegar_dados_paciente()
+        
+        # Cancelar se o formulário retornar None
+        if novos_dados is None:
+            return
 
-        # Verifica se o usuário tentou alterar o CPF para um que já pertence a outra pessoa
         if novos_dados["cpf"] != paciente.cpf:
             if self.buscar_paciente_por_cpf(novos_dados["cpf"]) is not None:
                 self.__limite_paciente.mostrar_mensagem("Erro: Já existe outro paciente com este novo CPF!")
                 return
 
-        # Atualizando os dados usando os setters da entidade
         paciente.nome = novos_dados["nome"]
         paciente.celular = novos_dados["celular"]
         paciente.cpf = novos_dados["cpf"]
@@ -82,13 +89,17 @@ class ControladorPaciente:
         self.__limite_paciente.mostrar_mensagem("Dados do paciente alterados com sucesso!")
 
     def excluir_paciente(self):
-        self.listar_pacientes()
         if len(self.__pacientes) == 0:
+            self.__limite_paciente.mostrar_mensagem("Nenhum paciente cadastrado no sistema.")
             return
 
         cpf_paciente = self.__limite_paciente.selecionar_paciente()
-        paciente = self.buscar_paciente_por_cpf(cpf_paciente)
+        
+        # Cancelar se a seleção retornar None
+        if cpf_paciente is None:
+            return
 
+        paciente = self.buscar_paciente_por_cpf(cpf_paciente)
         if paciente is None:
             self.__limite_paciente.mostrar_mensagem("Erro: Paciente não encontrado!")
         else:
