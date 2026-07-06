@@ -145,7 +145,11 @@ class ControladorAtendimento:
             return
         
         try:
-            id_atend = int(self.__limite_atendimento.pedir_string("Digite o ID do atendimento para excluir: "))
+            id_string = self.__limite_atendimento.pedir_string("Digite o ID do atendimento para excluir: ")
+            if id_string is None: # Tratamento se cancelar no popup de ID
+                return
+                
+            id_atend = int(id_string)
             atendimento = self.buscar_atendimento_por_id(id_atend)
             if atendimento:
                 self.__atendimentos.remove(atendimento)
@@ -161,18 +165,26 @@ class ControladorAtendimento:
             return
             
         try:
-            id_atend = int(self.__limite_atendimento.pedir_string("Digite o ID do atendimento para alterar: "))
+            id_string = self.__limite_atendimento.pedir_string("Digite o ID do atendimento para alterar: ")
+            if id_string is None: # Cancelou no ID
+                return
+                
+            id_atend = int(id_string)
             atendimento = self.buscar_atendimento_por_id(id_atend)
             if not atendimento:
                 raise ValueError("Atendimento não encontrado.")
             
             novos_dados = self.__limite_atendimento.pegar_dados_atendimento()
+            if novos_dados is None: # CORRIGIDO: Tratamento se o usuário clicou em cancelar no formulário
+                self.__limite_atendimento.mostrar_mensagem("Alteração cancelada pelo usuário.")
+                return
+                
             atendimento.data = novos_dados["data"]
             atendimento.horario_inicio = novos_dados["horario_inicio"]
             atendimento.horario_fim = novos_dados["horario_fim"]
             atendimento.valor_total = novos_dados["valor_total"]
             
-            self.__limite_atendimento.mostrar_mensagem("Atendimento alterado com sucesso.")
+            self.__limite_atendimento.mostrar_mensagem("Atendimento alteredo com sucesso.")
         except ValueError as e:
             self.__limite_atendimento.mostrar_mensagem(f"Erro: {e}")
 
@@ -182,15 +194,24 @@ class ControladorAtendimento:
             return
             
         try:
-            id_atend = int(self.__limite_atendimento.pedir_string("Digite o ID do atendimento para adicionar procedimento: "))
+            id_string = self.__limite_atendimento.pedir_string("Digite o ID do atendimento para adicionar procedimento: ")
+            if id_string is None:
+                return
+                
+            id_atend = int(id_string)
             atendimento = self.buscar_atendimento_por_id(id_atend)
             if not atendimento:
                 raise ValueError("Atendimento não encontrado.")
 
             dados_proc = self.__limite_atendimento.pegar_dados_procedimento()
+            if dados_proc is None: # CORRIGIDO: Tratamento de cancelamento na tela de procedimentos
+                return
             
             # Precisamos do profissional que realizou este procedimento
             cpf_prof = self.__limite_atendimento.pedir_string("Digite o CPF do profissional responsável pelo procedimento: ")
+            if cpf_prof is None:
+                return
+                
             prof_resp = self.__controlador_sistema.controlador_profissionais.buscar_profissional_por_cpf(cpf_prof)
             if not prof_resp:
                 raise ValueError("Profissional não encontrado no sistema.")
@@ -212,7 +233,11 @@ class ControladorAtendimento:
             return
             
         try:
-            id_atend = int(self.__limite_atendimento.pedir_string("Digite o ID do atendimento para pagar: "))
+            id_string = self.__limite_atendimento.pedir_string("Digite o ID do atendimento para pagar: ")
+            if id_string is None:
+                return
+                
+            id_atend = int(id_string)
             atendimento = self.buscar_atendimento_por_id(id_atend)
             if not atendimento:
                 raise ValueError("Atendimento não encontrado.")
@@ -224,6 +249,8 @@ class ControladorAtendimento:
                 
             self.__limite_atendimento.mostrar_mensagem(f"Valor pendente: R$ {valor_devido:.2f}")
             dados_pag = self.__limite_atendimento.pegar_dados_pagamento()
+            if dados_pag is None: # CORRIGIDO: Tratamento de cancelamento na tela de pagamento
+                return
 
             # Validação de Data (Regra 3)
             data_pag_limpa = dados_pag["data"].replace("/", "-")
@@ -248,10 +275,15 @@ class ControladorAtendimento:
                 novo_pagamento = PagamentoDinheiro(dados_pag["data"], atendimento, atendimento.paciente, valor_pago)
             elif tipo_pagamento == 2:
                 cpf_pix = self.__limite_atendimento.pedir_string("Digite o CPF do PIX: ")
+                if cpf_pix is None: return
                 novo_pagamento = PagamentoPix(dados_pag["data"], atendimento, atendimento.paciente, valor_pago, cpf_pix)
             elif tipo_pagamento == 3:
-                num_cartao = int(self.__limite_atendimento.pedir_string("Digite o número do cartão: "))
+                num_cartao_str = self.__limite_atendimento.pedir_string("Digite o número do cartão: ")
+                if num_cartao_str is None: return
+                num_cartao = int(num_cartao_str)
+                
                 bandeira = self.__limite_atendimento.pedir_string("Digite a bandeira: ")
+                if bandeira is None: return
                 novo_pagamento = PagamentoCartao(dados_pag["data"], atendimento, atendimento.paciente, valor_pago, num_cartao, bandeira)
             else:
                 raise ValueError("Tipo de pagamento inválido.")

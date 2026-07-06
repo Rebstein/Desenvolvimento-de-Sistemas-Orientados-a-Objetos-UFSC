@@ -32,7 +32,7 @@ class LimiteRelatorio:
         texto = "CLÍNICAS COM MAIS ATENDIMENTOS\n\n"
         for posicao, (clinica, quantidade) in enumerate(ranking, start=1):
             texto += f"{posicao}º - {clinica}: {quantidade} atendimento(s)\n"
-        sg.popup_scrolled(texto, title="Relatório Clínicas", size=(55, 12), text_color='white', font=("Courier New", 12))
+        sg.popup_scrolled(texto, title="Relatório Clínicas", size=(55, 12), font=("Courier New", 12))
 
     def mostrar_relatorio_atendimentos_extremos(self, dados: dict):
         texto = "ATENDIMENTOS EXTREMOS\n\n"
@@ -40,13 +40,13 @@ class LimiteRelatorio:
         texto += f"   ID: {dados['caro_id']} | Data: {dados['caro_data']} | Valor: R${dados['caro_valor']:.2f}\n\n"
         texto += "-> MAIS BARATO:\n"
         texto += f"   ID: {dados['barato_id']} | Data: {dados['barato_data']} | Valor: R${dados['barato_valor']:.2f}\n"
-        sg.popup(texto, title="Relatório Atendimentos Extremos", text_color='white', font=("Courier New", 12))
+        sg.popup(texto, title="Relatório Atendimentos Extremos", font=("Courier New", 12))
 
     def mostrar_relatorio_procedimentos_populares(self, ranking: list):
         texto = "PROCEDIMENTOS MAIS POPULARES\n\n"
         for posicao, (proc, quantidade) in enumerate(ranking, start=1):
             texto += f"{posicao}º - {proc}: realizado {quantidade} vez(es)\n"
-        sg.popup_scrolled(texto, title="Relatório Procedimentos Populares", size=(55, 12), text_color='white', font=("Courier New", 12))
+        sg.popup_scrolled(texto, title="Relatório Procedimentos Populares", size=(55, 12), font=("Courier New", 12))
 
     def mostrar_relatorio_procedimentos_extremos(self, dados: dict):
         texto = "PROCEDIMENTOS EXTREMOS\n\n"
@@ -54,4 +54,4 @@ class LimiteRelatorio:
         texto += f"   {dados['caro_desc']} - Custo: R${dados['caro_custo']:.2f}\n\n"
         texto += "-> MAIS BARATO:\n"
         texto += f"   {dados['barato_desc']} - Custo: R${dados['barato_custo']:.2f}\n"
-        sg.popup(texto, title="Relatório Procedimentos Extremos", text_color='white', font=("Courier New", 12))
+        sg.popup(texto, title="Relatório Procedimentos Extremos", font=("Courier New", 12))

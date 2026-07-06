@@ -47,7 +47,7 @@ class LimiteAtendimento:
 
     def pegar_dados_atendimento(self):
         fonte_texto = ("Courier New", 12)
-        tamanho_label = (20, 1)
+        tamanho_label = (26, 1)
         
         layout = [
             [sg.Text("Preencha os Dados do Atendimento", font=("Courier New", 16, "bold"), pad=(0, 15), text_color='white')],
