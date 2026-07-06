@@ -1,8 +1,10 @@
 class Clinica:
-  def __init__(self, nome: str, cidade: str, descricao: str):
+  def __init__(self, nome: str, cidade: str, descricao: str, horario_inicio: str, horario_fim: str):
     self.__nome = nome
     self.__cidade = cidade
     self.__descricao = descricao
+    self.__horario_funcionamento_inicio = horario_inicio
+    self.__horario_funcionamento_fim = horario_fim
 
     #agregação com classe atendimentos
     self.__atendimentos = []
@@ -30,6 +32,22 @@ class Clinica:
   @descricao.setter
   def descricao(self, descricao: str):
     self.__descricao = descricao
+
+  @property
+  def horario_funcionamento_inicio(self) -> str:
+    return self.__horario_funcionamento_inicio
+
+  @horario_funcionamento_inicio.setter
+  def horario_funcionamento_inicio(self, horario_inicio: str):
+    self.__horario_funcionamento_inicio = horario_inicio
+
+  @property
+  def horario_funcionamento_fim(self) -> str:
+    return self.__horario_funcionamento_fim
+
+  @horario_funcionamento_fim.setter
+  def horario_funcionamento_fim(self, horario_fim: str):
+    self.__horario_funcionamento_fim = horario_fim
 
   @property
   def atendimentos(self) -> list:
