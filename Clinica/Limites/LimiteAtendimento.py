@@ -5,18 +5,18 @@ class LimiteAtendimento:
         sg.theme('BlueMono')
         
         # Padrão calibrado para menus com textos longos nos botões
-        fonte_botoes = ("Helvetica", 12)
+        fonte_botoes = ("Courier New", 12)
         tamanho_botoes = (44, 1)
         
         layout = [
-            [sg.Text("ATENDIMENTOS", font=("Helvetica", 16, "bold"), pad=(0, 15))],
+            [sg.Text("ATENDIMENTOS", font=("Courier New", 16, "bold"), text_color='white', pad=(0, 15))],
             [sg.Button("Agendar Atendimento", key=1, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
             [sg.Button("Listar Atendimentos", key=2, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
             [sg.Button("Alterar Atendimento", key=3, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
             [sg.Button("Excluir Atendimento", key=4, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
             [sg.Button("Adicionar Procedimento a um Atendimento", key=5, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
             [sg.Button("Registrar Pagamento", key=6, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
-            [sg.Button("Retornar", key=0, size=tamanho_botoes, font=fonte_botoes, pad=(0, 15))]
+            [sg.Button("Retornar", key=0, size=tamanho_botoes, font=fonte_botoes, button_color=('white', 'blue'), pad=(0, 15))]
         ]
         window = sg.Window("Atendimentos", layout, element_justification='c')
         evento, _ = window.read()
@@ -27,7 +27,7 @@ class LimiteAtendimento:
         return evento
 
     def pedir_string(self, prompt: str):
-        fonte_texto = ("Helvetica", 12)
+        fonte_texto = ("Courier New", 12)
         
         layout = [
             [sg.Text(prompt, font=fonte_texto, pad=(0, 10))],
@@ -44,11 +44,11 @@ class LimiteAtendimento:
         return None
 
     def pegar_dados_atendimento(self):
-        fonte_texto = ("Helvetica", 12)
+        fonte_texto = ("Courier New", 12)
         tamanho_label = (22, 1)
         
         layout = [
-            [sg.Text("Preencha os Dados do Atendimento", font=("Helvetica", 16, "bold"), pad=(0, 15))],
+            [sg.Text("Preencha os Dados do Atendimento", font=("Courier New", 16, "bold"), pad=(0, 15))],
             [sg.Text("Data* (DD-MM-YYYY):", size=tamanho_label, font=fonte_texto), sg.InputText(key="data", font=fonte_texto)],
             [sg.Text("Horário de Início* (HH:MM):", size=tamanho_label, font=fonte_texto), sg.InputText(key="horario_inicio", font=fonte_texto)],
             [sg.Text("Horário de Fim* (HH:MM):", size=tamanho_label, font=fonte_texto), sg.InputText(key="horario_fim", font=fonte_texto)],
@@ -85,11 +85,11 @@ class LimiteAtendimento:
                 return valores
 
     def pegar_dados_procedimento(self):
-        fonte_texto = ("Helvetica", 12)
+        fonte_texto = ("Courier New", 12)
         tamanho_label = (15, 1)
         
         layout = [
-            [sg.Text("Adicionar Procedimento", font=("Helvetica", 16, "bold"), pad=(0, 15))],
+            [sg.Text("Adicionar Procedimento", font=("Courier New", 16, "bold"), pad=(0, 15))],
             [sg.Text("Descrição:", size=tamanho_label, font=fonte_texto), sg.InputText(key="descricao", font=fonte_texto)],
             [sg.Text("Custo (R$):", size=tamanho_label, font=fonte_texto), sg.InputText(key="custo", font=fonte_texto)],
             [sg.Button("Adicionar", key="OK", font=fonte_texto, size=(12, 1), pad=(10, 15)), 
@@ -108,11 +108,11 @@ class LimiteAtendimento:
         return None
 
     def pegar_dados_pagamento(self):
-        fonte_texto = ("Helvetica", 12)
+        fonte_texto = ("Courier New", 12)
         tamanho_label = (25, 1)
         
         layout = [
-            [sg.Text("Registrar Pagamento", font=("Helvetica", 16, "bold"), pad=(0, 15))],
+            [sg.Text("Registrar Pagamento", font=("Courier New", 16, "bold"), pad=(0, 15))],
             [sg.Text("Data Pagamento (DD-MM-YYYY):", size=tamanho_label, font=fonte_texto), sg.InputText(key="data", font=fonte_texto)],
             [sg.Text("Valor Pago (R$):", size=tamanho_label, font=fonte_texto), sg.InputText(key="valor", font=fonte_texto)],
             # Adicionada a fonte e dimensionamento correto no Frame e nos Radios
@@ -154,7 +154,7 @@ class LimiteAtendimento:
             texto += "-" * 55 + "\n"
         
         # Janela de rolagem com tamanho adequado para fontes maiores
-        sg.popup_scrolled(texto, title="Lista de Atendimentos", size=(70, 15), font=("Helvetica", 12))
+        sg.popup_scrolled(texto, title="Lista de Atendimentos", size=(70, 15), font=("Courier New", 12))
 
     def mostrar_mensagem(self, msg: str):
-        sg.popup(f"[ATENDIMENTO]: {msg}", title="Atendimentos", font=("Helvetica", 12))
+        sg.popup(f"[ATENDIMENTO]: {msg}", title="Atendimentos", font=("Courier New", 12))

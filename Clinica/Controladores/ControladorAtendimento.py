@@ -55,11 +55,12 @@ class ControladorAtendimento:
                 raise ValueError("Paciente não encontrado.")
             
             # Validação de > 18 anos
-            data_nasc = datetime.strptime(paciente.data_nascimento, "%d-%m-%Y").date()
+            data_nasc_limpa = paciente.data_nascimento.replace("/", "-")
+            data_nasc = datetime.strptime(data_nasc_limpa, "%d-%m-%Y").date()
             hoje = datetime.now().date()
             idade = hoje.year - data_nasc.year - ((hoje.month, hoje.day) < (data_nasc.month, data_nasc.day))
             if idade < 18:
-                raise ValueError("Regra de Negócio: Paciente menor de 18 anos não pode realizar atendimento independente.")
+                raise ValueError("Paciente menor de 18 anos não pode realizar atendimento independente.")
 
             # VALIDAÇÃO DE PROFISSIONAIS (Bloqueia antes de pedir o CPF)
             controlador_prof = self.__controlador_sistema.controlador_profissionais
@@ -225,8 +226,12 @@ class ControladorAtendimento:
             dados_pag = self.__limite_atendimento.pegar_dados_pagamento()
 
             # Validação de Data (Regra 3)
-            data_pagamento = datetime.strptime(dados_pag["data"], "%d-%m-%Y").date()
-            data_atendimento = datetime.strptime(atendimento.data, "%d-%m-%Y").date()
+            data_pag_limpa = dados_pag["data"].replace("/", "-")
+            data_atend_limpa = atendimento.data.replace("/", "-")
+
+            data_pagamento = datetime.strptime(data_pag_limpa, "%d-%m-%Y").date()
+            data_atendimento = datetime.strptime(data_atend_limpa, "%d-%m-%Y").date()
+            
             if data_pagamento > data_atendimento:
                 raise ValueError("Pagamentos não podem ser realizados após a data do atendimento.")
 

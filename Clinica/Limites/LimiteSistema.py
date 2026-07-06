@@ -4,13 +4,13 @@ class LimiteSistema:
     def tela_opcoes(self):
         sg.theme('BlueMono')  # Define o tema da interface
     
-        # Ajustado para um meio-termo ideal
-        fonte_botoes = ("Helvetica", 12)
-        tamanho_botoes = (28, 1)  # Um pouco maiores que o original, mas sem exagero
+        # Padrão de tamanho e fonte para os botões
+        fonte_botoes = ("Courier New", 12)
+        tamanho_botoes = (28, 1) 
         
+        # Layout do menu principal com botões centralizados
         layout = [
-            # Título reduzido de 22 para 16 e menos espaço vertical
-            [sg.Text("BEM-VINDO AO SISTEMA DE CLÍNICAS", font=("Helvetica", 16, "bold"), text_color='white', pad=(0, 15))],
+            [sg.Text("BEM-VINDO AO SISTEMA DE CLÍNICAS", font=("Courier New", 16, "bold"), text_color='white', pad=(0, 15))],
             [sg.Button("Clínicas", key=1, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
             [sg.Button("Pacientes", key=2, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
             [sg.Button("Profissionais", key=3, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
@@ -23,10 +23,11 @@ class LimiteSistema:
         evento, _ = window.read()
         window.close()
         
+        # Retorna -1 se o usuário fechar a janela (X) ou clicar em "Encerrar Sistema"
         if evento is None or evento == -1:
             return -1
         return evento
-                
+    
+    # Popup para exibir mensagens do sistema
     def mostrar_mensagem(self, msg: str):
-        # Popup com fonte tamanho 12 (legível e discreto)
-        sg.popup(f"[SISTEMA]: {msg}", title="Notificação do Sistema", font=("Helvetica", 12))
+        sg.popup(f"[SISTEMA]: {msg}", title="Notificação do Sistema", font=("Courier New", 12), text_color='white')
