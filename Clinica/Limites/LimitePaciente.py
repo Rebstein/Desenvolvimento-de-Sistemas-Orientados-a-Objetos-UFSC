@@ -9,7 +9,7 @@ class LimitePaciente:
         tamanho_botoes = (28, 1)
         
         layout = [
-            [sg.Text("PACIENTES", font=("Courier New", 16, "bold"), text_color='white', textpad=(0, 15))],
+            [sg.Text("PACIENTES", font=("Courier New", 16, "bold"), text_color='white', pad=(0, 15))],
             [sg.Button("Cadastrar Paciente", key=1, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
             [sg.Button("Listar Pacientes", key=2, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
             [sg.Button("Alterar Paciente", key=3, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],
@@ -33,7 +33,7 @@ class LimitePaciente:
             [sg.Text("Nome*:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="nome", font=fonte_texto)],
             [sg.Text("CPF*:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="cpf", font=fonte_texto)],
             [sg.Text("Celular:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="celular", font=fonte_texto)],
-            [sg.Text("Nascimento*:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="data_nascimento", font=fonte_texto), sg.Text("(DD-MM-YYYY)", font=("Courier New", 10, "italic"), text_color='white')],
+            [sg.Text("Nascimento*:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="data_nascimento", font=fonte_texto), sg.Text("(DD/MM/YYYY)", font=("Courier New", 10, "italic"), text_color='white')],
             [
                 sg.Push(),
                 sg.Button("Confirmar", key="OK", font=fonte_texto, size=(12, 1), button_color=('white', 'blue'), pad=(10, 15)), 
