@@ -1,19 +1,17 @@
+from DAOs.ProfissionalDao import ProfissionalDAO
 from Entidades.Profissional import Profissional
 from Limites.LimiteProfissional import LimiteProfissional
 
 class ControladorProfissional:
     def __init__(self, controlador_sistema):
         self.__controlador_sistema = controlador_sistema
-        self.__profissionais = []
+        self.__profissional_dao = ProfissionalDAO()
         self.__limite_profissional = LimiteProfissional()
 
     def buscar_profissional_por_cpf(self, cpf: str) -> Profissional | None:
         if not cpf:
             return None
-        for profesional in self.__profissionais:
-            if profesional.cpf == cpf:
-                return profesional
-        return None
+        return self.__profissional_dao.get(cpf)
 
     def incluir_profissional(self):
         dados_profissional = self.__limite_profissional.pegar_dados_profissional()
@@ -34,18 +32,19 @@ class ControladorProfissional:
                 dados_profissional["especialidade"],
                 dados_profissional["registro_profissional"]
             )
-            self.__profissionais.append(novo_profissional)
+            self.__profissional_dao.add(novo_profissional)
             self.__limite_profissional.mostrar_mensagem("Profissional cadastrado com sucesso!")
         except Exception as e:
             self.__limite_profissional.mostrar_mensagem(f"Erro inesperado ao cadastrar profissional: {e}")
 
     def listar_profissionais(self):
-        if len(self.__profissionais) == 0:
+        profissionais = self.__profissional_dao.get_all()
+        if len(profissionais) == 0:
             self.__limite_profissional.mostrar_mensagem("Nenhum profissional cadastrado no sistema.")
             return
 
         dados_profissionais = []
-        for profissional in self.__profissionais:
+        for profissional in profissionais:
             dados_profissionais.append({
                 "nome": profissional.nome,
                 "celular": profissional.celular,
@@ -57,7 +56,8 @@ class ControladorProfissional:
         self.__limite_profissional.mostrar_profissionais(dados_profissionais)
 
     def alterar_profissional(self):
-        if len(self.__profissionais) == 0:
+        profissionais = self.__profissional_dao.get_all()
+        if len(profissionais) == 0:
             self.__limite_profissional.mostrar_mensagem("Nenhum profissional cadastrado no sistema.")
             return
 
@@ -82,17 +82,22 @@ class ControladorProfissional:
             if self.buscar_profissional_por_cpf(novos_dados["cpf"]) is not None:
                 self.__limite_profissional.mostrar_mensagem("Erro: Já existe outro profissional com este novo CPF!")
                 return
+            
+            self.__profissional_dao.remove(profissional.cpf)
 
         profissional.nome = novos_dados["nome"]
         profissional.celular = novos_dados["celular"]
         profissional.cpf = novos_dados["cpf"]
         profissional.especialidade = novos_dados["especialidade"]
         profissional.registro_profissional = novos_dados["registro_profissional"]
+
+        self.__profissional_dao.update(profissional)
         
         self.__limite_profissional.mostrar_mensagem("Dados do profissional alterados com sucesso!")
 
     def excluir_profissional(self):
-        if len(self.__profissionais) == 0:
+        profissionais = self.__profissional_dao.get_all()
+        if len(profissionais) == 0:
             self.__limite_profissional.mostrar_mensagem("Nenhum profissional cadastrado no sistema.")
             return
 
@@ -106,7 +111,7 @@ class ControladorProfissional:
         if profissional is None:
             self.__limite_profissional.mostrar_mensagem("Erro: Profissional não encontrado!")
         else:
-            self.__profissionais.remove(profissional)
+            self.__profissional_dao.remove(profissional.cpf)
             self.__limite_profissional.mostrar_mensagem(f"Profissional '{profissional.nome}' excluído com sucesso!")
 
     def abrir_menu(self):

@@ -33,6 +33,8 @@ class LimiteClinica:
             [sg.Text("Nome da Clínica*:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="nome", font=fonte_texto)],
             [sg.Text("Cidade*:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="cidade", font=fonte_texto)],
             [sg.Text("Descrição:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="descricao", font=fonte_texto)],
+            [sg.Text("Horário Início:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="horario_inicio", font=fonte_texto)],
+            [sg.Text("Horário Fim:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="horario_fim", font=fonte_texto)],
             [
                 sg.Push(),
                 sg.Button("Confirmar", key="OK", font=fonte_texto, size=(12, 1), button_color=('white', 'blue'), pad=(10, 15)), 
@@ -80,6 +82,7 @@ class LimiteClinica:
         for clinica in dados_clinicas:
             texto += f"Nome: {clinica['nome']} | Cidade: {clinica['cidade']}\n"
             texto += f"Descrição: {clinica['descricao']}\n"
+            texto += f"Horário de Funcionamento: {clinica['horario_inicio']} - {clinica['horario_fim']}\n"
             texto += "-" * 45 + "\n"
         
         # Janela de rolagem ampliada para acompanhar a fonte
