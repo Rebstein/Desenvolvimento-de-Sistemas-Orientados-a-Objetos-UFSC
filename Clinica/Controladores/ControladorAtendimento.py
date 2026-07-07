@@ -1,3 +1,4 @@
+from DAOs.AtendimentoDao import AtendimentoDAO
 from datetime import datetime
 from Entidades.Atendimento import Atendimento
 from Entidades.Procedimento import Procedimento
@@ -10,7 +11,7 @@ from Limites.LimiteAtendimento import LimiteAtendimento
 class ControladorAtendimento:
     def __init__(self, controlador_sistema):
         self.__controlador_sistema = controlador_sistema
-        self.__atendimentos = []
+        self.__atendimento_dao = AtendimentoDAO()
         self.__limite_atendimento = LimiteAtendimento()
     
     @property
@@ -112,7 +113,7 @@ class ControladorAtendimento:
             if tipo_enum == TipoAtendimento.RETORNO:
                 novo_atendimento.valor_total = 0.0
 
-            self.__atendimentos.append(novo_atendimento)
+            self.__profissional_dao.add(novo_atendimento)
             self.__limite_atendimento.mostrar_mensagem("Atendimento agendado com sucesso!")
 
         except ValueError as e:
@@ -152,7 +153,7 @@ class ControladorAtendimento:
             id_atend = int(id_string)
             atendimento = self.buscar_atendimento_por_id(id_atend)
             if atendimento:
-                self.__atendimentos.remove(atendimento)
+                self.__profissional_dao.remove(atendimento.id_atend)
                 self.__limite_atendimento.mostrar_mensagem("Atendimento excluído com sucesso!")
             else:
                 self.__limite_atendimento.mostrar_mensagem("ID não encontrado.")

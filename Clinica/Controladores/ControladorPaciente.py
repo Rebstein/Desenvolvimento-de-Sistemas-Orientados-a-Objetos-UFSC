@@ -1,19 +1,18 @@
 from Entidades.Paciente import Paciente
 from Limites.LimitePaciente import LimitePaciente
+from DAOs.PacienteDao import PacienteDAO
+
 
 class ControladorPaciente:
     def __init__(self, controlador_sistema):
         self.__controlador_sistema = controlador_sistema
-        self.__pacientes = []
+        self.__paciente_dao = PacienteDAO()
         self.__limite_paciente = LimitePaciente()
 
     def buscar_paciente_por_cpf(self, cpf: str) -> Paciente | None:
-        if not cpf:
+        if not cpf:  # Proteção extra contra buscas vazias
             return None
-        for paciente in self.__pacientes:
-            if paciente.cpf == cpf:
-                return paciente
-        return None
+        return self.__paciente_dao.get(cpf)
 
     def incluir_paciente(self):
         dados_paciente = self.__limite_paciente.pegar_dados_paciente()
@@ -33,18 +32,19 @@ class ControladorPaciente:
                 dados_paciente["celular"],
                 dados_paciente["data_nascimento"]
             )
-            self.__pacientes.append(novo_paciente)
+            self.__paciente_dao.add(novo_paciente)
             self.__limite_paciente.mostrar_mensagem("Paciente cadastrado com sucesso!")
         except Exception as e:
             self.__limite_paciente.mostrar_mensagem(f"Erro inesperado ao cadastrar paciente: {e}")
 
     def listar_pacientes(self):
-        if len(self.__pacientes) == 0:
+        pacientes = self.__paciente_dao.get_all()
+        if len(pacientes) == 0:
             self.__limite_paciente.mostrar_mensagem("Nenhum paciente cadastrado no sistema.")
             return
 
         dados_pacientes = []
-        for paciente in self.__pacientes:
+        for paciente in pacientes:
             dados_pacientes.append({
                 "nome": paciente.nome,
                 "celular": paciente.celular,
@@ -55,7 +55,8 @@ class ControladorPaciente:
         self.__limite_paciente.mostrar_pacientes(dados_pacientes)
 
     def alterar_paciente(self):
-        if len(self.__pacientes) == 0:
+        pacientes = self.__paciente_dao.get_all()
+        if len(pacientes) == 0:
             self.__limite_paciente.mostrar_mensagem("Nenhum paciente cadastrado no sistema.")
             return
 
@@ -80,16 +81,20 @@ class ControladorPaciente:
             if self.buscar_paciente_por_cpf(novos_dados["cpf"]) is not None:
                 self.__limite_paciente.mostrar_mensagem("Erro: Já existe outro paciente com este novo CPF!")
                 return
+            self.__paciente_dao.remove(paciente.cpf)
 
         paciente.nome = novos_dados["nome"]
         paciente.celular = novos_dados["celular"]
         paciente.cpf = novos_dados["cpf"]
         paciente.data_nascimento = novos_dados["data_nascimento"]
         
+        self.__paciente_dao.update(paciente)
+
         self.__limite_paciente.mostrar_mensagem("Dados do paciente alterados com sucesso!")
 
     def excluir_paciente(self):
-        if len(self.__pacientes) == 0:
+        pacientes = self.__paciente_dao.get_all()
+        if len(pacientes) == 0:
             self.__limite_paciente.mostrar_mensagem("Nenhum paciente cadastrado no sistema.")
             return
 
@@ -103,7 +108,7 @@ class ControladorPaciente:
         if paciente is None:
             self.__limite_paciente.mostrar_mensagem("Erro: Paciente não encontrado!")
         else:
-            self.__pacientes.remove(paciente)
+            self.__paciente_dao.remove(paciente.cpf)
             self.__limite_paciente.mostrar_mensagem(f"Paciente '{paciente.nome}' excluído com sucesso!")
 
     def abrir_menu(self):

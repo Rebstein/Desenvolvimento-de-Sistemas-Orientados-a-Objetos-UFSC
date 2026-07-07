@@ -1,24 +1,21 @@
 from Entidades.Clinica import Clinica
 from Limites.LimiteClinica import LimiteClinica
+from DAOs.ClinicaDao import ClinicaDao
 
 class ControladorClinica:
     def __init__(self, controlador_sistema):
         self.__controlador_sistema = controlador_sistema
-        self.__clinicas = []
+        self.__clinica_dao = ClinicaDao()
         self.__limite_clinica = LimiteClinica()
 
     def buscar_clinica_por_nome(self, nome: str) -> Clinica | None:
         if not nome:  # Proteção extra contra buscas vazias
             return None
-        for clinica in self.__clinicas:
-            if clinica.nome.upper() == nome.upper():
-                return clinica
-        return None
+        return self.__clinica_dao.get(nome)
 
     def incluir_clinica(self):
         dados_clinica = self.__limite_clinica.pegar_dados_clinica()
         
-        # CORREÇÃO: Se clicou em cancelar ou fechou a janela, interrompe a execução
         if dados_clinica is None:
             return
 
@@ -30,36 +27,43 @@ class ControladorClinica:
             nova_clinica = Clinica(
                 dados_clinica["nome"],
                 dados_clinica["cidade"],
-                dados_clinica["descricao"]
-            )
-            self.__clinicas.append(nova_clinica)
+                dados_clinica["descricao"],
+                dados_clinica["horario_inicio"],
+                dados_clinica["horario_fim"]
+                )
+            self.__clinica_dao.add(nova_clinica)
             self.__limite_clinica.mostrar_mensagem("Clínica cadastrada com sucesso!")
         except Exception as e:
             self.__limite_clinica.mostrar_mensagem(f"Erro inesperado ao cadastrar a clínica: {e}")
 
     def listar_clinicas(self):
-        if len(self.__clinicas) == 0:
+        # Substituímos a lista self.__clinicas pelo get_all() do DAO
+        clinicas = self.__clinica_dao.get_all()
+        
+        if len(clinicas) == 0:
             self.__limite_clinica.mostrar_mensagem("Nenhuma clínica cadastrada no sistema.")
             return
 
         dados_clinicas = []
-        for clinica in self.__clinicas:
+        for clinica in clinicas:
             dados_clinicas.append({
                 "nome": clinica.nome,
                 "cidade": clinica.cidade,
-                "descricao": clinica.descricao
+                "descricao": clinica.descricao,
+                "horario_inicio": clinica.horario_funcionamento_inicio,
+                "horario_fim": clinica.horario_funcionamento_fim
             })
             
         self.__limite_clinica.mostrar_clinicas(dados_clinicas)
 
     def alterar_clinica(self):
-        if len(self.__clinicas) == 0:
+        clinicas = self.__clinica_dao.get_all()
+        if len(clinicas) == 0:
             self.__limite_clinica.mostrar_mensagem("Nenhuma clínica cadastrada no sistema.")
             return
 
         nome_clinica = self.__limite_clinica.selecionar_clinica()
         
-        # Aborta se o usuário cancelou a seleção
         if nome_clinica is None:
             return
 
@@ -70,7 +74,6 @@ class ControladorClinica:
 
         novos_dados = self.__limite_clinica.pegar_dados_clinica()
         
-        # Aborta se cancelou o formulário de alteração
         if novos_dados is None:
             return
 
@@ -78,21 +81,27 @@ class ControladorClinica:
             if self.buscar_clinica_por_nome(novos_dados["nome"]) is not None:
                 self.__limite_clinica.mostrar_mensagem("Erro: Já existe outra clínica com este novo nome!")
                 return
+            # Remove a clínica do dicionário com o nome antigo
+            self.__clinica_dao.remove(clinica.nome)
 
         clinica.nome = novos_dados["nome"]
         clinica.cidade = novos_dados["cidade"]
         clinica.descricao = novos_dados["descricao"]
+        clinica.horario_funcionamento_inicio = novos_dados["horario_inicio"]
+        clinica.horario_funcionamento_fim = novos_dados["horario_fim"]
+
+        self.__clinica_dao.update(clinica)
         
-        self.__limite_clinica.mostrar_mensagem("Dados do clínica alterados com sucesso!")
+        self.__limite_clinica.mostrar_mensagem("Dados da clínica alterados com sucesso!")
 
     def excluir_clinica(self):
-        if len(self.__clinicas) == 0:
+        clinicas = self.__clinica_dao.get_all()
+        if len(clinicas) == 0:
             self.__limite_clinica.mostrar_mensagem("Nenhuma clínica cadastrada no sistema.")
             return
 
         nome_clinica = self.__limite_clinica.selecionar_clinica()
         
-        # CORREÇÃO: Aborta se cancelou a seleção
         if nome_clinica is None:
             return
 
@@ -100,7 +109,7 @@ class ControladorClinica:
         if clinica is None:
             self.__limite_clinica.mostrar_mensagem("Erro: Clínica não encontrada!")
         else:
-            self.__clinicas.remove(clinica)
+            self.__clinica_dao.remove(clinica.nome)
             self.__limite_clinica.mostrar_mensagem(f"Clínica '{clinica.nome}' excluída com sucesso!")
 
     def abrir_menu(self):
