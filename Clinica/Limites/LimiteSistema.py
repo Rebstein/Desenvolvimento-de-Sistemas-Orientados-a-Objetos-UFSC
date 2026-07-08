@@ -2,13 +2,12 @@ import PySimpleGUI as sg
 
 class LimiteSistema:
     def tela_opcoes(self):
-        sg.theme('BlueMono')  # Define o tema da interface
+        sg.theme('BlueMono')
     
-        # Padrão de tamanho e fonte para os botões
+        # Padrão para botões (mais simples de fazer alterações)
         fonte_botoes = ("Courier New", 12)
         tamanho_botoes = (28, 1) 
-        
-        # Layout do menu principal com botões centralizados
+      
         layout = [
             [sg.Text("BEM-VINDO AO SISTEMA DE CLÍNICAS", font=("Courier New", 16, "bold"), text_color='white', pad=(0, 15))],
             [sg.Button("Clínicas", key=1, size=tamanho_botoes, font=fonte_botoes, pad=(0, 5))],

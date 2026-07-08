@@ -4,7 +4,7 @@ class LimitePaciente:
     def tela_opcoes(self):
         sg.theme('BlueMono')
         
-        # Padrão de tamanho e fonte para os botões
+        # Padrão para botões (mais simples de fazer alterações)
         fonte_botoes = ("Courier New", 12)
         tamanho_botoes = (28, 1)
         
@@ -20,10 +20,12 @@ class LimitePaciente:
         evento, _ = window.read()
         window.close()
         
+        # Caso o usuário selecione 'X' (-1) ele fecha o sistema
         if evento is None or evento == -1:
             return -1
         return evento
 
+    # Função para criar um paciente no sistema
     def pegar_dados_paciente(self):
         fonte_texto = ("Courier New", 12)
         tamanho_label = (15, 1) 
@@ -34,20 +36,19 @@ class LimitePaciente:
             [sg.Text("CPF*:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="cpf", font=fonte_texto)],
             [sg.Text("Celular:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="celular", font=fonte_texto)],
             [sg.Text("Nascimento*:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="data_nascimento", font=fonte_texto), sg.Text("(DD/MM/YYYY)", font=("Courier New", 10, "italic"), text_color='white')],
-            [
-                sg.Push(),
-                sg.Button("Confirmar", key="OK", font=fonte_texto, size=(12, 1), button_color=('white', 'blue'), pad=(10, 15)), 
+            [sg.Push(),
+             sg.Button("Confirmar", key="OK", font=fonte_texto, size=(12, 1), button_color=('white', 'blue'), pad=(10, 15)), 
              sg.Button("Cancelar", key="CANCEL", font=fonte_texto, size=(12, 1), button_color=('white', 'red'), pad=(10, 15))]
         ]
         window = sg.Window("Formulário Paciente", layout)
         
         while True:
             evento, valores = window.read()
-            
+            # Caso o usuário selecione "Cancelar", fecha a janela e retorna None
             if evento in (None, "CANCEL"):
                 window.close()
                 return None
-                
+            # Verifica se os campos obrigatórios estão preenchidos
             if evento == "OK":
                 if valores["nome"].strip() == "" or valores["cpf"].strip() == "" or valores["data_nascimento"].strip() == "":
                     sg.popup_error("Erro: Nome, CPF e Data de Nascimento são obrigatórios!", title="Campos Vazios", font=fonte_texto)
@@ -56,16 +57,16 @@ class LimitePaciente:
                 window.close()
                 return valores
 
+    # FUnção para selecionar um paciente (solicitando o CPF do paciente)
     def selecionar_paciente(self):
         fonte_texto = ("Courier New", 12)
         
         layout = [
             [sg.Text("Digite o CPF do Paciente que deseja selecionar:", font=fonte_texto, pad=(0, 10), text_color='white')],
             [sg.InputText(key="cpf", font=fonte_texto, pad=(0, 10))],
-            [
-                sg.Push(),
-                sg.Button("Selecionar", key="OK", font=fonte_texto, button_color=('white', 'blue'), size=(12, 1)), 
-                sg.Button("Cancelar", key="CANCEL", font=fonte_texto, button_color=('white', 'red'), size=(12, 1))]
+            [sg.Push(),
+             sg.Button("Selecionar", key="OK", font=fonte_texto, button_color=('white', 'blue'), size=(12, 1)), 
+             sg.Button("Cancelar", key="CANCEL", font=fonte_texto, button_color=('white', 'red'), size=(12, 1))]
         ]
         window = sg.Window("Selecionar", layout, element_justification='c')
         evento, valores = window.read()
@@ -75,6 +76,7 @@ class LimitePaciente:
             return valores["cpf"]
         return None
 
+    # Função para mostrar os pacientes cadastrados no sistema
     def mostrar_pacientes(self, dados_pacientes):
         texto = "Pacientes Cadastrados\n\n"
         if not dados_pacientes:
@@ -84,8 +86,8 @@ class LimitePaciente:
             texto += f"Celular: {p['celular']} | Nasc: {p['data_nascimento']}\n"
             texto += "-" * 45 + "\n"
         
-        # Ampliada a janela de rolagem para ler confortavelmente em fontes maiores
         sg.popup_scrolled(texto, title="Lista de Pacientes", size=(60, 14), font=("Courier New", 12))
 
+    # Padrão para mensagens do controlador
     def mostrar_mensagem(self, msg: str):
         sg.popup(f"[PACIENTE]: {msg}", title="Pacientes", font=("Courier New", 12), text_color='white')

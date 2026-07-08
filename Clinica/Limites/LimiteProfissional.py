@@ -4,7 +4,7 @@ class LimiteProfissional:
     def tela_opcoes(self):
         sg.theme('BlueMono')
         
-        # Padrão de tamanho calibrado para o menu
+        # Padrão para botões (mais simples de fazer alterações)
         fonte_botoes = ("Courier New", 12)
         tamanho_botoes = (28, 1)
         
@@ -20,10 +20,12 @@ class LimiteProfissional:
         evento, _ = window.read()
         window.close()
         
+        # Caso o usuário selecione 'X' (-1) ele fecha o sistema
         if evento is None or evento == -1:
             return -1
         return evento
 
+    # Função para criar um profissional no sistema
     def pegar_dados_profissional(self):
   
         fonte_texto = ("Courier New", 12)
@@ -36,20 +38,19 @@ class LimiteProfissional:
             [sg.Text("Celular:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="celular", font=fonte_texto)],
             [sg.Text("Especialidade:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="especialidade", font=fonte_texto)],
             [sg.Text("Reg. Profissional*:", size=tamanho_label, font=fonte_texto, text_color='white'), sg.InputText(key="registro_profissional", font=fonte_texto)],
-            [
-                sg.Push(),
-                sg.Button("Confirmar", key="OK", font=fonte_texto, size=(12, 1), button_color=('white', 'blue'), pad=(10, 15)), 
-                sg.Button("Cancelar", key="CANCEL", font=fonte_texto, size=(12, 1), button_color=('white', 'red'), pad=(10, 15))]
+            [sg.Push(),
+             sg.Button("Confirmar", key="OK", font=fonte_texto, size=(12, 1), button_color=('white', 'blue'), pad=(10, 15)), 
+             sg.Button("Cancelar", key="CANCEL", font=fonte_texto, size=(12, 1), button_color=('white', 'red'), pad=(10, 15))]
         ]
         window = sg.Window("Formulário Profissional", layout)
         
         while True:
             evento, valores = window.read()
-            
+            # Caso o usuário selecione "Cancelar", fecha a janela e retorna None
             if evento in (None, "CANCEL"):
                 window.close()
                 return None
-                
+            # Verifica se os campos obrigatórios estão preenchidos
             if evento == "OK":
                 if valores["nome"].strip() == "" or valores["cpf"].strip() == "" or valores["registro_profissional"].strip() == "":
                     sg.popup_error("Erro: Nome, CPF e Registro Profissional são obrigatórios!", title="Campos Vazios", font=fonte_texto)
@@ -58,16 +59,16 @@ class LimiteProfissional:
                 window.close()
                 return valores
 
+    # Função para selecionar um profissional (solicitando o CPF do profissional)
     def selecionar_profissional(self):
         fonte_texto = ("Courier New", 12)
         
         layout = [
             [sg.Text("Digite o CPF do Profissional que deseja selecionar:", font=fonte_texto, text_color='white', pad=(0, 10))],
             [sg.InputText(key="cpf", font=fonte_texto, text_color='black', pad=(0, 10))],
-            [
-                sg.Push(),
-                sg.Button("Selecionar", key="OK", font=fonte_texto, button_color=('white', 'blue'), size=(12, 1)), 
-                sg.Button("Cancelar", key="CANCEL", font=fonte_texto, button_color=('white', 'red'), size=(12, 1))]
+            [sg.Push(),
+             sg.Button("Selecionar", key="OK", font=fonte_texto, button_color=('white', 'blue'), size=(12, 1)), 
+             sg.Button("Cancelar", key="CANCEL", font=fonte_texto, button_color=('white', 'red'), size=(12, 1))]
         ]
         window = sg.Window("Selecionar", layout, element_justification='c')
         evento, valores = window.read()
@@ -77,6 +78,7 @@ class LimiteProfissional:
             return valores["cpf"]
         return None
 
+    # Função para mostrar os profissionais cadastrados no sistema
     def mostrar_profissionais(self, dados_profissionais):
         texto = "Profissionais Cadastrados\n\n"
         if not dados_profissionais:
@@ -88,5 +90,6 @@ class LimiteProfissional:
         
         sg.popup_scrolled(texto, title="Lista de Profissionais", size=(65, 15), font=("Courier New", 12))
 
+    # Padrão para mensagens do controlador
     def mostrar_mensagem(self, msg: str):
         sg.popup(f"[PROFISSIONAL]: {msg}", title="Profissionais", text_color='white', font=("Courier New", 12))
