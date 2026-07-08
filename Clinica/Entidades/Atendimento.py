@@ -20,6 +20,7 @@ class Atendimento:
         self.__horario_fim = horario_fim
         self.__tipo_atendimento = tipo_atendimento
         self.__valor_total = valor_total
+        self.__id = None
         
         # relações 0..* e 1..* (Composição)
         self.__procedimentos = []
@@ -104,6 +105,14 @@ class Atendimento:
     @pagamentos.setter
     def pagamentos(self, pagamentos: list): 
         self.__pagamentos = pagamentos
+
+    @property
+    def id(self) -> int:
+        return self.__id
+
+    @id.setter
+    def id(self, id: int):
+        self.__id = id
 
     def adicionar_procedimento(self, procedimento):
         self.__procedimentos.append(procedimento)

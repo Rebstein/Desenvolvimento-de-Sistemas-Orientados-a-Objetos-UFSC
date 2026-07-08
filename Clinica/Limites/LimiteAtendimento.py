@@ -157,8 +157,17 @@ class LimiteAtendimento:
             texto += f"Valor Total: R${at['valor_total']:.2f} | Restante: R${at['valor_restante']:.2f}\n"
             texto += "-" * 55 + "\n"
         
-        # Janela de rolagem com tamanho adequado para fontes maiores
         sg.popup_scrolled(texto, title="Lista de Atendimentos", size=(70, 15), font=("Courier New", 12))
+
+    def pedir_cpf_pix(self) -> str | None:
+        return sg.popup_get_text("Digite o CPF do pagador:", title="Dados PIX")
+
+    def pedir_dados_cartao(self) -> tuple[str, str] | None:
+        num_cartao = sg.popup_get_text("Digite o número do cartão:", title="Dados Cartão")
+        if num_cartao is None: return None
+        bandeira = sg.popup_get_text("Digite a bandeira do cartão:", title="Dados Cartão")
+        if bandeira is None: return None
+        return num_cartao, bandeira
 
     def mostrar_mensagem(self, msg: str):
         sg.popup(f"[ATENDIMENTO]: {msg}", title="Atendimentos", font=("Courier New", 12), text_color='white')

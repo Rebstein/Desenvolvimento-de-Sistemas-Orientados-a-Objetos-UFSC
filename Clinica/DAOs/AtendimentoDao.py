@@ -6,11 +6,11 @@ class AtendimentoDAO(DAO):
         super().__init__('atendimentos.pkl')
 
     def add(self, atendimento: Atendimento):
-        if (atendimento is not None) and isinstance(atendimento, Atendimento) and isinstance(atendimento.id, str):
+        if (atendimento is not None) and isinstance(atendimento, Atendimento) and isinstance(atendimento.id, int):
             super().add(atendimento.id, atendimento)
 
     def update(self, atendimento: Atendimento):
-        if (atendimento is not None) and isinstance(atendimento, Atendimento) and isinstance(atendimento.id, str):
+        if (atendimento is not None) and isinstance(atendimento, Atendimento) and isinstance(atendimento.id, int):
             super().add(atendimento.id, atendimento)
 
     def get(self, key: int):

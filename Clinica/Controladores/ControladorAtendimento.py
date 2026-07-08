@@ -1,5 +1,5 @@
 from DAOs.AtendimentoDao import AtendimentoDAO
-from datetime import datetime
+from datetime import datetime, time
 from Entidades.Atendimento import Atendimento
 from Entidades.Procedimento import Procedimento
 from Entidades.TipoAtendimento import TipoAtendimento
@@ -16,81 +16,75 @@ class ControladorAtendimento:
     
     @property
     def atendimentos(self):
-        return self.__atendimentos
+        return self.__atendimento_dao.get_all()
 
     def buscar_atendimento_por_id(self, id_atendimento: int):
-        if 0 <= id_atendimento < len(self.__atendimentos):
-            return self.__atendimentos[id_atendimento]
-        return None
+        # CORREÇÃO: Passa a buscar o atendimento diretamente pela chave numérica no DAO
+        return self.__atendimento_dao.get(id_atendimento)
 
     def incluir_atendimento(self):
         try:
-            # VALIDAÇÃO DE CLÍNICAS (Bloqueia antes de pedir o nome)
             controlador_cli = self.__controlador_sistema.controlador_clinicas
-            if len(controlador_cli._ControladorClinica__clinicas) == 0:
-                controlador_cli.listar_clinicas() # Exibe o popup de "Nenhuma clínica cadastrada"
-                return # Aborta o agendamento imediatamente
-
+            
             controlador_cli.listar_clinicas()
-            nome_clinica = self.__limite_atendimento.pedir_string("Digite o nome da Clínica para o atendimento: ")
-            if nome_clinica is None: # Se o usuário cancelou na tela de pedir string
-                return
-                
+            nome_clinica = self.__limite_atendimento.pedir_string("Digite o nome da Clínica para o atendimento:")
+            if nome_clinica is None: return
+
             clinica = controlador_cli.buscar_clinica_por_nome(nome_clinica)
-            if not clinica:
-                raise ValueError("Clínica não encontrada.")
+            if clinica is None:
+                self.__limite_atendimento.mostrar_mensagem("Erro: Clínica não encontrada!")
+                return
 
-            # VALIDAÇÃO DE PACIENTES (Bloqueia antes de pedir o CPF)
+            # Seleção do Paciente via pedir_string
             controlador_pac = self.__controlador_sistema.controlador_pacientes
-            if len(controlador_pac._ControladorPaciente__pacientes) == 0:
-                controlador_pac.listar_pacientes()
-                return
-
             controlador_pac.listar_pacientes()
-            cpf_paciente = self.__limite_atendimento.pedir_string("Digite o CPF do Paciente: ")
-            if cpf_paciente is None:
-                return
-                
+            cpf_paciente = self.__limite_atendimento.pedir_string("Digite o CPF do Paciente:")
+            if cpf_paciente is None: return
             paciente = controlador_pac.buscar_paciente_por_cpf(cpf_paciente)
-            if not paciente:
-                raise ValueError("Paciente não encontrado.")
-            
-            # Validação de > 18 anos
-            data_nasc_limpa = paciente.data_nascimento.replace("/", "-")
-            data_nasc = datetime.strptime(data_nasc_limpa, "%d-%m-%Y").date()
-            hoje = datetime.now().date()
-            idade = hoje.year - data_nasc.year - ((hoje.month, hoje.day) < (data_nasc.month, data_nasc.day))
-            if idade < 18:
-                raise ValueError("Paciente menor de 18 anos não pode realizar atendimento independente.")
+            if paciente is None:
+                self.__limite_atendimento.mostrar_mensagem("Erro: Paciente não cadastrado!")
+                return
 
-            # VALIDAÇÃO DE PROFISSIONAIS (Bloqueia antes de pedir o CPF)
+            # Seleção do Profissional via pedir_string
             controlador_prof = self.__controlador_sistema.controlador_profissionais
-            if len(controlador_prof._ControladorProfissional__profissionais) == 0:
-                controlador_prof.listar_profissionais()
-                return
-
             controlador_prof.listar_profissionais()
-            cpf_profissional = self.__limite_atendimento.pedir_string("Digite o CPF do Profissional: ")
-            if cpf_profissional is None:
-                return
-                
+            cpf_profissional = self.__limite_atendimento.pedir_string("Digite o CPF do Profissional:")
+            if cpf_profissional is None: return
             profissional = controlador_prof.buscar_profissional_por_cpf(cpf_profissional)
-            if not profissional:
-                raise ValueError("Profissional não encontrado.")
+            if profissional is None:
+                self.__limite_atendimento.mostrar_mensagem("Erro: Profissional não cadastrado!")
+                return
 
-            # 4. Dados do Atendimento
-            dados = self.__limite_atendimento.pegar_dados_atendimento()
-            if dados is None: # Tratamento de cancelamento do formulário
+            # Coleta de dados do Atendimento
+            dados_atend = self.__limite_atendimento.pegar_dados_atendimento()
+            if dados_atend is None: return
+
+            # Conversão de Strings de data/hora para objetos nativos
+            data_limpa = dados_atend["data"].replace("/", "-")
+            data_obj = datetime.strptime(data_limpa, "%d-%m-%Y").date()
+            horario_inicio_obj = datetime.strptime(dados_atend["horario_inicio"], "%H:%M").time()
+            horario_fim_obj = datetime.strptime(dados_atend["horario_fim"], "%H:%M").time()
+
+            # Horário de Funcionamento da Clínica
+            try:
+                cli_inicio = datetime.strptime(clinica.horario_funcionamento_inicio, "%H:%M").time()
+                cli_fim = datetime.strptime(clinica.horario_funcionamento_fim, "%H:%M").time()
+            except Exception:
+                raise ValueError("Os horários de funcionamento da clínica estão em formato inválido (use HH:MM).")
+
+            if horario_inicio_obj < cli_inicio or horario_fim_obj > cli_fim:
+                self.__limite_atendimento.mostrar_mensagem(
+                    f"Erro: O atendimento está fora do horário de funcionamento da clínica!\n"
+                    f"Funcionamento da Clínica: {clinica.horario_funcionamento_inicio} até {clinica.horario_funcionamento_fim}"
+                )
                 return
             
-            # Validação de Horário
-            hora_inicio = datetime.strptime(dados["horario_inicio"], "%H:%M").time()
-            hora_fim = datetime.strptime(dados["horario_fim"], "%H:%M").time()
-            if hora_inicio >= hora_fim:
-                raise ValueError("Horário inválido: O fim do atendimento deve ser após o início.")
+            if horario_inicio_obj >= horario_fim_obj:
+                self.__limite_atendimento.mostrar_mensagem("Erro: Horário de início deve ser menor que o horário de fim.")
+                return
 
-            # Mapeamento do Enum de Tipo Atendimento
-            tipo_str = dados["tipo_atendimento"].upper()
+            # Mapeamento do texto do tipo de atendimento para o Enum correspondente
+            tipo_str = dados_atend["tipo_atendimento"].upper()
             if tipo_str == "CONSULTA": tipo_enum = TipoAtendimento.CONSULTA
             elif tipo_str == "EXAME": tipo_enum = TipoAtendimento.EXAME
             elif tipo_str == "RETORNO": tipo_enum = TipoAtendimento.RETORNO
@@ -98,204 +92,224 @@ class ControladorAtendimento:
             elif tipo_str in ["EMERGÊNCIA", "EMERGENCIA"]: tipo_enum = TipoAtendimento.EMERGÊNCIA
             else: raise ValueError("Tipo de atendimento inválido.")
 
-            # Criação do Atendimento
             novo_atendimento = Atendimento(
-                clinica, 
-                paciente, 
-                profissional,
-                dados["data"], 
-                dados["horario_inicio"], 
-                dados["horario_fim"], 
-                tipo_enum, 
-                dados["valor_total"]
+                clinica, paciente, profissional=profissional, 
+                data=data_obj, horario_inicio=horario_inicio_obj, horario_fim=horario_fim_obj,
+                tipo_atendimento=tipo_enum, valor_total=dados_atend["valor_total"]
             )
 
             if tipo_enum == TipoAtendimento.RETORNO:
                 novo_atendimento.valor_total = 0.0
 
-            self.__profissional_dao.add(novo_atendimento)
+            # CORREÇÃO: Atribui a posição da lista/dicionário como ID numérico antes de enviar ao DAO
+            novo_id = len(self.__atendimento_dao.get_all())
+            novo_atendimento.id = novo_id
+
+            self.__atendimento_dao.add(novo_atendimento)
             self.__limite_atendimento.mostrar_mensagem("Atendimento agendado com sucesso!")
 
         except ValueError as e:
-            self.__limite_atendimento.mostrar_mensagem(f"Erro de Validação: {e}")
+            self.__limite_atendimento.mostrar_mensagem(f"Erro de validação nos dados: {e}")
         except Exception as e:
             self.__limite_atendimento.mostrar_mensagem(f"Erro inesperado: {e}")
 
     def listar_atendimentos(self):
-        if not self.__atendimentos:
-            self.__limite_atendimento.mostrar_mensagem("Nenhum atendimento registrado.")
+        todos = self.__atendimento_dao.get_all()
+        dados_lista = []
+        
+        if not todos or len(todos) == 0:
+            self.__limite_atendimento.mostrar_mensagem("Nenhum atendimento cadastrado no sistema.")
             return
 
-        dados_atend = []
-        for index, at in enumerate(self.__atendimentos):
-            dados_atend.append({
-                "id": index,
-                "data": at.data,
+        # CORREÇÃO: Agora mapeia usando o id armazenado no próprio objeto atendimento
+        for at in todos:
+            if hasattr(at.data, "strftime"):
+                data_formatada = at.data.strftime("%d-%m-%Y")
+            else:
+                data_formatada = str(at.data).replace("/", "-")
+
+            tipo_formatado = at.tipo_atendimento.name if hasattr(at.tipo_atendimento, 'name') else str(at.tipo_atendimento)
+
+            dados_lista.append({
+                "id": at.id,  
+                "data": data_formatada,
+                "tipo": tipo_formatado,
                 "paciente": at.paciente.nome,
-                "clinica": at.clinica.nome,
                 "profissional": at.profissional.nome,
-                "tipo": at.tipo_atendimento.name if isinstance(at.tipo_atendimento, TipoAtendimento) else at.tipo_atendimento,
+                "clinica": at.clinica.nome,
                 "valor_total": at.valor_total,
                 "valor_restante": at.calcular_valor_restante()
             })
-        self.__limite_atendimento.mostrar_atendimentos(dados_atend)
-
-    def excluir_atendimento(self):
-        self.listar_atendimentos()
-        if not self.__atendimentos:
-            return
-        
-        try:
-            id_string = self.__limite_atendimento.pedir_string("Digite o ID do atendimento para excluir: ")
-            if id_string is None: # Tratamento se cancelar no popup de ID
-                return
-                
-            id_atend = int(id_string)
-            atendimento = self.buscar_atendimento_por_id(id_atend)
-            if atendimento:
-                self.__profissional_dao.remove(atendimento.id_atend)
-                self.__limite_atendimento.mostrar_mensagem("Atendimento excluído com sucesso!")
-            else:
-                self.__limite_atendimento.mostrar_mensagem("ID não encontrado.")
-        except ValueError:
-            self.__limite_atendimento.mostrar_mensagem("ID inválido. Digite um número.")
+            
+        self.__limite_atendimento.mostrar_atendimentos(dados_lista)
 
     def alterar_atendimento(self):
-        self.listar_atendimentos()
-        if not self.__atendimentos:
+        todos = self.__atendimento_dao.get_all()
+        if len(todos) == 0:
+            self.__limite_atendimento.mostrar_mensagem("Nenhum atendimento agendado.")
             return
-            
+
+        self.listar_atendimentos()
+        id_string = self.__limite_atendimento.pedir_string("Digite o ID do atendimento que deseja alterar:")
+        if id_string is None: return
+
         try:
-            id_string = self.__limite_atendimento.pedir_string("Digite o ID do atendimento para alterar: ")
-            if id_string is None: # Cancelou no ID
-                return
-                
             id_atend = int(id_string)
             atendimento = self.buscar_atendimento_por_id(id_atend)
-            if not atendimento:
-                raise ValueError("Atendimento não encontrado.")
-            
-            novos_dados = self.__limite_atendimento.pegar_dados_atendimento()
-            if novos_dados is None: # CORRIGIDO: Tratamento se o usuário clicou em cancelar no formulário
-                self.__limite_atendimento.mostrar_mensagem("Alteração cancelada pelo usuário.")
+            if atendimento is None:
+                self.__limite_atendimento.mostrar_mensagem("Erro: Atendimento não encontrado!")
                 return
-                
-            atendimento.data = novos_dados["data"]
-            atendimento.horario_inicio = novos_dados["horario_inicio"]
-            atendimento.horario_fim = novos_dados["horario_fim"]
-            atendimento.valor_total = novos_dados["valor_total"]
-            
-            self.__limite_atendimento.mostrar_mensagem("Atendimento alteredo com sucesso.")
-        except ValueError as e:
-            self.__limite_atendimento.mostrar_mensagem(f"Erro: {e}")
+
+            dados_atend = self.__limite_atendimento.pegar_dados_atendimento()
+            if dados_atend is None: return
+
+            data_limpa = dados_atend["data"].replace("/", "-")
+            data_obj = datetime.strptime(data_limpa, "%d-%m-%Y").date()
+            horario_inicio_obj = datetime.strptime(dados_atend["horario_inicio"], "%H:%M").time()
+            horario_fim_obj = datetime.strptime(dados_atend["horario_fim"], "%H:%M").time()
+
+            cli_inicio = datetime.strptime(atendimento.clinica.horario_funcionamento_inicio, "%H:%M").time()
+            cli_fim = datetime.strptime(atendimento.clinica.horario_funcionamento_fim, "%H:%M").time()
+
+            if horario_inicio_obj < cli_inicio or horario_fim_obj > cli_fim:
+                self.__limite_atendimento.mostrar_mensagem(
+                    f"Erro: Horário fora do expediente da clínica ({atendimento.clinica.horario_funcionamento_inicio} - {atendimento.clinica.horario_funcionamento_fim})."
+                )
+                return
+
+            tipo_str = dados_atend["tipo_atendimento"].upper()
+            if tipo_str == "CONSULTA": tipo_enum = TipoAtendimento.CONSULTA
+            elif tipo_str == "EXAME": tipo_enum = TipoAtendimento.EXAME
+            elif tipo_str == "RETORNO": tipo_enum = TipoAtendimento.RETORNO
+            elif tipo_str == "PROCEDIMENTO": tipo_enum = TipoAtendimento.PROCEDIMENTO
+            elif tipo_str in ["EMERGÊNCIA", "EMERGENCIA"]: tipo_enum = TipoAtendimento.EMERGÊNCIA
+            else: raise ValueError("Tipo inválido.")
+
+            atendimento.data = data_obj
+            atendimento.horario_inicio = horario_inicio_obj
+            atendimento.horario_fim = horario_fim_obj
+            atendimento.tipo_atendimento = tipo_enum
+            atendimento.valor_total = dados_atend["valor_total"]
+
+            if tipo_enum == TipoAtendimento.RETORNO:
+                atendimento.valor_total = 0.0
+
+            # CORREÇÃO: Garante que chama o update do DAO utilizando a própria chave numérica do id
+            if hasattr(self.__atendimento_dao, 'update'):
+                self.__atendimento_dao.update(atendimento)
+            else:
+                self.__atendimento_dao.add(atendimento)
+
+            self.__limite_atendimento.mostrar_mensagem("Atendimento alterado com sucesso!")
+        except Exception as e:
+            self.__limite_atendimento.mostrar_mensagem(f"Erro ao alterar: {e}")
+
+    def excluir_atendimento(self):
+        todos = self.__atendimento_dao.get_all()
+        if len(todos) == 0:
+            self.__limite_atendimento.mostrar_mensagem("Nenhum atendimento cadastrado.")
+            return
+
+        self.listar_atendimentos()
+        id_string = self.__limite_atendimento.pedir_string("Digite o ID do atendimento que deseja excluir:")
+        if id_string is None: return
+
+        try:
+            id_atend = int(id_string)
+            atendimento = self.buscar_atendimento_por_id(id_atend)
+            if atendimento is None:
+                self.__limite_atendimento.mostrar_mensagem("Erro: Atendimento não encontrado!")
+            else:
+                # CORREÇÃO: Passa explicitamente o id (chave numérica int) exigido no método do seu DAO
+                self.__atendimento_dao.remove(atendimento.id)
+                self.__limite_atendimento.mostrar_mensagem("Atendimento excluído com sucesso!")
+        except ValueError:
+            self.__limite_atendimento.mostrar_mensagem("Erro: ID inválido.")
 
     def adicionar_procedimento(self):
         self.listar_atendimentos()
-        if not self.__atendimentos:
-            return
-            
+        id_string = self.__limite_atendimento.pedir_string("Digite o ID do atendimento:")
+        if id_string is None: return
+
         try:
-            id_string = self.__limite_atendimento.pedir_string("Digite o ID do atendimento para adicionar procedimento: ")
-            if id_string is None:
-                return
-                
             id_atend = int(id_string)
             atendimento = self.buscar_atendimento_por_id(id_atend)
-            if not atendimento:
-                raise ValueError("Atendimento não encontrado.")
+            if atendimento is None:
+                self.__limite_atendimento.mostrar_mensagem("Erro: Atendimento não encontrado!")
+                return
 
             dados_proc = self.__limite_atendimento.pegar_dados_procedimento()
-            if dados_proc is None: # CORRIGIDO: Tratamento de cancelamento na tela de procedimentos
-                return
-            
-            # Precisamos do profissional que realizou este procedimento
-            cpf_prof = self.__limite_atendimento.pedir_string("Digite o CPF do profissional responsável pelo procedimento: ")
-            if cpf_prof is None:
-                return
-                
-            prof_resp = self.__controlador_sistema.controlador_profissionais.buscar_profissional_por_cpf(cpf_prof)
-            if not prof_resp:
-                raise ValueError("Profissional não encontrado no sistema.")
+            if dados_proc is None: return
 
-            # Composição: O procedimento é instanciado com o profissional e pertence a este atendimento
-            novo_procedimento = Procedimento(dados_proc["descricao"], dados_proc["custo"], prof_resp)
-            atendimento.adicionar_procedimento(novo_procedimento) 
-            
-            # Atualiza o valor total do atendimento somando o custo do procedimento
+            novo_procedimento = Procedimento(
+                dados_proc["descricao"],
+                dados_proc["custo"],
+                atendimento.profissional
+            )
+            atendimento.adicionar_procedimento(novo_procedimento)
             atendimento.valor_total += dados_proc["custo"]
             
+            if hasattr(self.__atendimento_dao, 'update'):
+                self.__atendimento_dao.update(atendimento)
+            else:
+                self.__atendimento_dao.add(atendimento)
+                
             self.__limite_atendimento.mostrar_mensagem("Procedimento adicionado com sucesso!")
-        except ValueError as e:
-             self.__limite_atendimento.mostrar_mensagem(f"Erro: {e}")
+        except ValueError:
+            self.__limite_atendimento.mostrar_mensagem("Erro: ID inválido.")
 
     def registrar_pagamento(self):
         self.listar_atendimentos()
-        if not self.__atendimentos:
-            return
-            
+        id_string = self.__limite_atendimento.pedir_string("Digite o ID do atendimento para pagar:")
+        if id_string is None: return
+
         try:
-            id_string = self.__limite_atendimento.pedir_string("Digite o ID do atendimento para pagar: ")
-            if id_string is None:
-                return
-                
             id_atend = int(id_string)
             atendimento = self.buscar_atendimento_por_id(id_atend)
-            if not atendimento:
-                raise ValueError("Atendimento não encontrado.")
+            if atendimento is None:
+                self.__limite_atendimento.mostrar_mensagem("Erro: Atendimento não encontrado!")
+                return
 
-            valor_devido = atendimento.calcular_valor_restante()
-            if valor_devido <= 0:
+            restante = atendimento.calcular_valor_restante()
+            if restante <= 0:
                 self.__limite_atendimento.mostrar_mensagem("Este atendimento já está totalmente pago!")
                 return
-                
-            self.__limite_atendimento.mostrar_mensagem(f"Valor pendente: R$ {valor_devido:.2f}")
+
+            self.__limite_atendimento.mostrar_mensagem(f"Valor pendente: R$ {restante:.2f}")
             dados_pag = self.__limite_atendimento.pegar_dados_pagamento()
-            if dados_pag is None: # CORRIGIDO: Tratamento de cancelamento na tela de pagamento
-                return
-
-            # Validação de Data (Regra 3)
-            data_pag_limpa = dados_pag["data"].replace("/", "-")
-            data_atend_limpa = atendimento.data.replace("/", "-")
-
-            data_pagamento = datetime.strptime(data_pag_limpa, "%d-%m-%Y").date()
-            data_atendimento = datetime.strptime(data_atend_limpa, "%d-%m-%Y").date()
-            
-            if data_pagamento > data_atendimento:
-                raise ValueError("Pagamentos não podem ser realizados após a data do atendimento.")
+            if dados_pag is None: return
 
             valor_pago = dados_pag["valor"]
-            if valor_pago > valor_devido:
-                self.__limite_atendimento.mostrar_mensagem(f"Valor excede a dívida. Registrando apenas o restante: R$ {valor_devido:.2f}")
-                valor_pago = valor_devido
+            if valor_pago <= 0 or valor_pago > restante:
+                self.__limite_atendimento.mostrar_mensagem(f"Erro: Valor inválido.")
+                return
 
-            tipo_pagamento = dados_pag["tipo_pagamento"] 
-            novo_pagamento = None
-
-            # Ordem correta dos parâmetros: data, atendimento, paciente, valor_pago
-            if tipo_pagamento == 1:
+            tipo = dados_pag["tipo_pagamento"]
+            if tipo == 1:
                 novo_pagamento = PagamentoDinheiro(dados_pag["data"], atendimento, atendimento.paciente, valor_pago)
-            elif tipo_pagamento == 2:
-                cpf_pix = self.__limite_atendimento.pedir_string("Digite o CPF do PIX: ")
-                if cpf_pix is None: return
-                novo_pagamento = PagamentoPix(dados_pag["data"], atendimento, atendimento.paciente, valor_pago, cpf_pix)
-            elif tipo_pagamento == 3:
-                num_cartao_str = self.__limite_atendimento.pedir_string("Digite o número do cartão: ")
-                if num_cartao_str is None: return
-                num_cartao = int(num_cartao_str)
-                
-                bandeira = self.__limite_atendimento.pedir_string("Digite a bandeira: ")
-                if bandeira is None: return
-                novo_pagamento = PagamentoCartao(dados_pag["data"], atendimento, atendimento.paciente, valor_pago, num_cartao, bandeira)
-            else:
-                raise ValueError("Tipo de pagamento inválido.")
+            elif tipo == 2:
+                # CORREÇÃO MVC: Chama a View para pedir o texto
+                cpf_pagador = self.__limite_atendimento.pedir_cpf_pix()
+                if cpf_pagador is None: return
+                novo_pagamento = PagamentoPix(dados_pag["data"], atendimento, atendimento.paciente, valor_pago, cpf_pagador)
+            elif tipo == 3:
+                # CORREÇÃO MVC: Chama a View para pedir os dados do cartão
+                dados_cartao = self.__limite_atendimento.pedir_dados_cartao()
+                if dados_cartao is None: return
+                num_cartao, bandeira = dados_cartao
+                novo_pagamento = PagamentoCartao(dados_pag["data"], atendimento, atendimento.paciente, valor_pago, int(num_cartao), bandeira)
 
-            atendimento.adicionar_pagamento(novo_pagamento) 
+            atendimento.adicionar_pagamento(novo_pagamento)
             
+            if hasattr(self.__atendimento_dao, 'update'):
+                self.__atendimento_dao.update(atendimento)
+            else:
+                self.__atendimento_dao.add(atendimento)
+                
             restante_agora = atendimento.calcular_valor_restante()
-            self.__limite_atendimento.mostrar_mensagem(f"Pagamento registrado! Restante a pagar: R$ {restante_agora:.2f}")
-
-        except ValueError as e:
-            self.__limite_atendimento.mostrar_mensagem(f"Erro na validação: {e}")
+            self.__limite_atendimento.mostrar_mensagem(f"Pagamento registrado! Restante: R$ {restante_agora:.2f}")
+        except Exception as e:
+            self.__limite_atendimento.mostrar_mensagem(f"Erro no pagamento: {e}")
 
     def abrir_menu(self):
         opcoes = {
@@ -310,19 +324,17 @@ class ControladorAtendimento:
 
         while True:
             opcao = self.__limite_atendimento.tela_opcoes()
-       
             if opcao == -1:
                 self.__controlador_sistema.encerrar_sistema()
                 break
 
             funcao_escolhida = opcoes.get(opcao)
-            
             if funcao_escolhida:
                 funcao_escolhida()
                 if opcao == 0: 
                     break
             else:
-                self.__limite_atendimento.mostrar_mensagem("Opção inválida!")
+                self.__limite_atendimento.mostrar_mensagem("Opção Inválida!")
 
     def retornar(self):
         pass
